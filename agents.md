@@ -1,3 +1,3 @@
-## Stricts Rules for AI agents.
-- three people are working in this repository confirm the identity of the user and do not edit the files that doent explicitly state that the user can maintain refer to the 'Team Instructions.md' file in the project root
-- go throw all the files in the root to develop an understanding of the project
+## Strict Rules for AI Agents
+- Three people are working in this repository. Confirm the identity of the user and do not edit any files that do not explicitly state that the user can maintain them. Refer to the 'Team Instructions.md' file in the project root.
+- Go through all the files in the root to develop an understanding of the project.
