@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
+import testRoutes from './routes/test.js';
+import questionRoutes from './routes/question.js';
+import attemptRoutes from './routes/attempt.js';
+import reportRoutes from './routes/report.js';
 
 // Load env variables
 dotenv.config();
@@ -18,6 +22,10 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/tests', testRoutes);
+app.use('/api/questions', questionRoutes);
+app.use('/api/attempts', attemptRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

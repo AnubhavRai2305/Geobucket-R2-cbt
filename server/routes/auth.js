@@ -120,7 +120,7 @@ router.post('/staff/login', async (req, res) => {
 // @route   POST /api/auth/student/register
 // @access  Staff Only (Admin, Teacher)
 router.post('/student/register', protect, requireRole(['admin', 'teacher']), async (req, res) => {
-  const { name, email, rollNumber, password } = req.body;
+  const { name, email, rollNumber, password, eligibleTests } = req.body;
 
   try {
     const studentExists = await Student.findOne({ $or: [{ email }, { rollNumber }] });
@@ -137,7 +137,7 @@ router.post('/student/register', protect, requireRole(['admin', 'teacher']), asy
       email,
       rollNumber,
       passwordHash,
-      eligibleTests: [],
+      eligibleTests: eligibleTests || [],
     });
 
     res.status(201).json({
