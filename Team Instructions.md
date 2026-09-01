@@ -27,9 +27,25 @@ All required APIs and backend mechanics are fully implemented, enhanced, seeded,
 - **Polymorphic Question Delivery**: `GET /api/tests/:id/questions` strips `correctAnswer` for student tokens while returning full data for staff.
 - **Admin Dashboard**: React + Vite admin dashboard in `./admin/` is linted and built.
 
-### For Jaya Patel (Module 2 - Exam UI) & Anubhav Rai (Module 3 - Security & Results)
-The backend is completely operational and ready for your frontend integrations:
-1. **Connect Security**: In your main CBT layout, invoke `const { violationsCount, isLocked, startSecurityMonitoring } = useExamSecurity(attemptId);`.
-2. **Handle Lockout**: Conditionally render `<LockoutScreen violationsCount={violationsCount} />` when `isLocked === true`.
-3. **Question Display & Syncing**: Use `GET /api/tests/:id/questions` to render questions and `PATCH /api/attempts/:id/answers` to auto-save candidate selections.
-4. **Auto-Submit & Grading**: On timer expiry or candidate submission, call `POST /api/attempts/:id/submit` and render the backend-evaluated score breakdown.
+### For Jaya Patel (Module 2 - Exam UI) & Anubhav Rai (Module 3 - Security & Results) - ✅ IMPLEMENTED
+The frontend integrations are now coded and linked up!
+
+---
+
+## MVP Evaluation Checklist Summary (Against PDF Requirements)
+
+### ✅ What is Working (Implemented)
+- **Core CBT Experience**: Student exam flow (Test Selection $\rightarrow$ Start $\rightarrow$ Examination $\rightarrow$ Submit $\rightarrow$ Result) is fully operational.
+- **Question Layouts**: MCQ, MSQ, and NAT are implemented, and the Question Palette states update correctly (Answered, Marked for Review, etc.).
+- **Controls**: Save & Next, Mark for Review, Clear Response, and auto-syncing of answers work.
+- **Timer & Auto-Submit**: Timer is securely fetched from the backend `endTime` and auto-submits upon expiry.
+- **Security & Restrictions**: Full-screen mode, tab/window switching, right-click, copy/paste, and restricted shortcuts are actively monitored and successfully trip the `<LockoutScreen>` UI if violations exceed the threshold.
+- **Evaluation**: The frontend does not expose correct answers. Grading correctly happens server-side, and the Results screen accurately displays the final score and metrics.
+- **Admin**: The admin can securely manage tests and questions (completed by Anurag).
+
+### ⚠️ What is NOT Working / Pending (To Be Verified)
+- **State Interruption Recovery**: While the API exists, we still need to manually end-to-end test that a browser refresh properly recovers the session and countdown timer seamlessly.
+- **Screenshot Protection**: Not implemented (as it's severely limited by browser capabilities without native software).
+- **Deployment**: The complete application still needs to be deployed to a live HTTPS URL (e.g., Vercel, Render).
+- **Technical Documentation**: The main `README.md` needs to be updated with architecture, DB schema, and setup instructions as per the "Deliverables" section in the PDF.
+- **Final Security Tests**: Need manual verification that student tokens absolutely cannot access admin endpoints.

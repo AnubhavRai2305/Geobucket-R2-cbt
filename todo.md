@@ -53,19 +53,19 @@ The backend Express server has been fully implemented, seeded, and tested. The f
 
 ### Submission & Results
 
-- [ ] **Before-Submission Confirmation Screen**: Show a warning modal prompting the user to confirm they are ready to submit their answers.
-- [ ] **Submit API Integration**: Trigger the final exam submission to the backend to officially grade the attempt.
+- [x] **Before-Submission Confirmation Screen**: Show a warning modal prompting the user to confirm they are ready to submit their answers.
+- [x] **Submit API Integration**: Trigger the final exam submission to the backend to officially grade the attempt.
   * Route: `POST /api/attempts/:id/submit`
-- [ ] **Student Result Screen**: Render a clean UI component to display the final score, correct answers count, and detailed breakdown.
-- [ ] **Result API Integration**: Fetch the graded evaluation payload from the backend after submission.
-- [ ] **Verify backend-generated score is displayed**: Ensure the frontend only displays the score provided by the backend evaluation, without calculating it locally.
+- [x] **Student Result Screen**: Render a clean UI component to display the final score, correct answers count, and detailed breakdown.
+- [x] **Result API Integration**: Fetch the graded evaluation payload from the backend after submission.
+- [x] **Verify backend-generated score is displayed**: Ensure the frontend only displays the score provided by the backend evaluation, without calculating it locally.
 - [ ] **Verify correct answers are not exposed before submission**: Audit the frontend state to guarantee correct answers are completely hidden during the exam.
 
 ### Integration
 
-- [ ] **Integrate security hook with Jaya's CBT**: Provide the `useExamSecurity` hook variables directly to Jaya's main exam layout.
-- [ ] **Integrate lock state with CBT UI**: Connect the `isLocked` boolean to Jaya's conditional rendering logic for the exam.
-- [ ] **Integrate authentication with CBT**: Wrap Jaya's routes in the `AuthProvider` and use `user` state to gate access.
+- [x] **Integrate security hook with Jaya's CBT**: Provide the `useExamSecurity` hook variables directly to Jaya's main exam layout.
+- [x] **Integrate lock state with CBT UI**: Connect the `isLocked` boolean to Jaya's conditional rendering logic for the exam.
+- [x] **Integrate authentication with CBT**: Wrap Jaya's routes in the `AuthProvider` and use `user` state to gate access.
 - [ ] **Test refresh → attempt recovery**: Simulate a page reload during an active exam and verify the timer and answers are restored.
 - [ ] **Test security events → MongoDB**: Trigger violations and verify they are correctly appended to the `ExamAttempt` document in MongoDB.
 - [ ] **Test submission → evaluation → result**: Perform an end-to-end flow from starting an exam, answering questions, and viewing the graded result.
@@ -80,22 +80,22 @@ The backend Express server has been fully implemented, seeded, and tested. The f
 - [ ] **Clean commits / push branch**: Ensure code is linted and pushed with descriptive commit messages.
 
 ## Module 2 - CBT Mock Test Interface (Jaya Patel)
-- [ ] **Fetch Eligible Tests**: Query the server to render active tests assigned to the logged-in candidate:
+- [x] **Fetch Eligible Tests**: Query the server to render active tests assigned to the logged-in candidate:
   * Route: `GET /api/tests`
-- [ ] **Start Exam Session**: Call the start route on test launch:
+- [x] **Start Exam Session**: Call the start route on test launch:
   * Route: `POST /api/attempts/start` with body `{ "testId": "ObjectId" }`
   * Store the returned `attemptId` and compute the countdown duration using the `endTime` ISO timestamp.
-- [ ] **Security Lockout Integration**: Use Anubhav's `useExamSecurity` hook to get `isLocked` and conditionally render `<LockoutScreen violationsCount={violationsCount} />` over the exam interface if triggered.
-- [ ] **Fetch Secure Questions**: Load questions using:
+- [x] **Security Lockout Integration**: Use Anubhav's `useExamSecurity` hook to get `isLocked` and conditionally render `<LockoutScreen violationsCount={violationsCount} />` over the exam interface if triggered.
+- [x] **Fetch Secure Questions**: Load questions using:
   * Route: `GET /api/tests/:testId/questions`
   * *Notice*: The correct answers are omitted on this route. Do not perform any client-side grading.
-- [ ] **Render Interactive Layouts**: Build input components based on question `type`:
+- [x] **Render Interactive Layouts**: Build input components based on question `type`:
   * `MCQ` $\rightarrow$ Standard Radio options (single correct option ID).
   * `MSQ` $\rightarrow$ Checkbox buttons (multiple option IDs as an array).
   * `NAT` $\rightarrow$ Virtual number pad or numeric input field.
-- [ ] **Auto-Save Answers**: Live-sync candidates' options changes immediately as they browse questions:
+- [x] **Auto-Save Answers**: Live-sync candidates' options changes immediately as they browse questions:
   * Route: `PATCH /api/attempts/:attemptId/answers`
   * Body: `{ "questionId": "ObjectId", "selectedAnswer": "opt_id" | ["opt_1", "opt_2"] | 15.5, "status": "answered" | "marked_for_review" | "answered_and_marked" }`
-- [ ] **Auto-Submit on Timer Expiry**: When the countdown timer reaches zero, automatically call:
+- [x] **Auto-Submit on Timer Expiry**: When the countdown timer reaches zero, automatically call:
   * Route: `POST /api/attempts/:attemptId/submit`
   * Fetch and render the final score from the graded `evaluation` response block.
