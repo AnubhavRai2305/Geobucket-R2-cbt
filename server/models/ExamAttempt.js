@@ -5,13 +5,17 @@ const answerSchema = new mongoose.Schema({
   selectedAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
   status: {
     type: String,
-    enum: ['not_visited', 'not_answered', 'answered', 'marked_for_review', 'answered_and_marked'],
+    enum: ['not_visited', 'not_answered', 'answered', 'marked_for_review', 'answered_and_marked', 'answered_marked_for_review'],
     default: 'not_visited'
   }
 }, { _id: false });
 
 const violationSchema = new mongoose.Schema({
-  type: { type: String, required: true, enum: ['fullscreen_exit', 'tab_switch'] },
+  type: {
+    type: String,
+    required: true,
+    enum: ['fullscreen_exit', 'tab_switch', 'page_refresh', 'restricted_shortcut', 'clipboard_action']
+  },
   timestamp: { type: Date, default: Date.now },
   details: { type: String }
 }, { _id: false });

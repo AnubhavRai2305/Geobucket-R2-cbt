@@ -1,22 +1,26 @@
 # Backend API Todo List (For Module 1 - Anurag)
 
-The `/api/auth` endpoints are fully implemented and tested. However, the following core exam endpoints have not yet been built on the Node server and are returning 404 errors. They must be completed so the frontend modules can function properly:
+All backend endpoints are fully implemented, enhanced, and validated against MongoDB:
 
 ### 1. Exam Attempts & Security
-- [x] `POST /api/attempts/:id/violations`: Required for Module 3 (Anubhav) to report tab-switching and fullscreen exits.
-- [x] `POST /api/attempts/start`: Required for Module 2 (Jaya) to initiate a student exam session and receive the `attemptId` and countdown timer.
-- [x] `PATCH /api/attempts/:id/answers`: Required for Module 2 (Jaya) to live-sync student answer choices.
-- [x] `POST /api/attempts/:id/submit`: Required for Module 2 (Jaya) to submit the exam for backend grading.
+- [x] `POST /api/attempts/:id/violations`: Handles all violation types (`fullscreen_exit`, `tab_switch`, `page_refresh`, `restricted_shortcut`, `clipboard_action`), auto-locks at 3 infractions, and returns `{ success, violationsCount, isLocked }`.
+- [x] `GET /api/attempts/:id`: Allows interruption/recovery resumption and polling of attempt status.
+- [x] `POST /api/attempts/start`: Initiates student exam sessions, returning `attemptId` and countdown timer parameters.
+- [x] `PATCH /api/attempts/:id/answers`: Live-syncs student responses across MCQ, MSQ, and NAT formats.
+- [x] `POST /api/attempts/:id/submit`: Evaluates submissions server-side against marking schemes and grades results.
+- [x] `POST /api/attempts/:id/unlock`: Staff endpoint to clear infractions and unlock student sessions.
 
 ### 2. Tests & Questions
-- [x] `GET /api/tests`: Required to pull the list of eligible/active tests for a logged-in student.
-- [x] `GET /api/tests/:id/questions`: Required to pull the questions for a specific test (Remember: The backend MUST strip out `correctAnswer` for students!).
-- [x] `POST /api/tests` & `PATCH /api/tests/:id/toggle`: Admin/Teacher routes to create tests.
-- [x] `POST /api/tests/:id/questions`: Admin/Teacher routes to add questions to tests.
+- [x] `GET /api/tests`: Polymorphic listing (Staff: all tests; Student: active and assigned tests).
+- [x] `GET /api/tests/:id/questions`: Secure question retrieval (strips `correctAnswer` for students; full schema for staff).
+- [x] `POST /api/tests` & `PATCH /api/tests/:id/toggle`: Admin/Teacher test creation and publishing toggles.
+- [x] `DELETE /api/tests/:id`: Admin test deletion with cascading question bank cleanup.
+- [x] `POST /api/tests/:id/questions`: Admin/Teacher question creation endpoint.
+- [x] `PUT /api/questions/:id` & `DELETE /api/questions/:id`: Admin/Teacher question update and deletion.
 
-### 3. Analytics (Optional / Later)
-- [x] `GET /api/reports/tests/:id/summary`
-- [x] `GET /api/reports/tests/:id/attempts`
+### 3. Analytics & Reporting
+- [x] `GET /api/reports/tests/:id/summary`: Aggregate analytics (average score, durations, total infractions).
+- [x] `GET /api/reports/tests/:id/attempts`: Candidate attempt records with timestamps and violation history.
 
 ---
 

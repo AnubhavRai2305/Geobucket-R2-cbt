@@ -49,7 +49,7 @@ router.post('/', protect, requireRole(['admin', 'teacher']), async (req, res) =>
       createdBy: req.user.id
     });
     
-    return res.status(201).json({ success: true, message: 'Test created successfully.', test });
+    return res.status(201).json({ success: true, testId: test._id, message: 'Test created successfully.', test });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -68,7 +68,26 @@ router.patch('/:id/toggle', protect, requireRole(['admin', 'teacher']), async (r
     test.isActive = !test.isActive;
     await test.save();
     
-    return res.json({ success: true, message: `Test status toggled to ${test.isActive ? 'Active' : 'Inactive'}.`, test });
+    return res.json({ success: true, isActive: test.isActive, message: `Test status toggled to ${test.isActive ? 'Active' : 'Inactive'}.`, test });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Delete a test and all associated questions
+// @route   DELETE /api/tests/:id
+// @access  Private (Staff - admin only)
+router.delete('/:id', protect, requireRole(['admin']), async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Test not found.' });
+    }
+
+    await Question.deleteMany({ testId: req.params.id });
+    await Test.findByIdAndDelete(req.params.id);
+
+    return res.json({ success: true, message: 'Test and all associated questions deleted.' });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -113,7 +132,7 @@ router.post('/:id/questions', protect, requireRole(['admin', 'teacher']), async 
       correctAnswer
     });
     
-    return res.status(201).json({ success: true, message: 'Question added successfully.', question });
+    return res.status(201).json({ success: true, questionId: question._id, message: 'Question added successfully.', question });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

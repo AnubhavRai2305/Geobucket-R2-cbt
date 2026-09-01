@@ -43,7 +43,7 @@ const TestBuilder = ({ onEditQuestions }) => {
         body: JSON.stringify({ isActive: !currentStatus }),
       });
       fetchTests();
-    } catch (err) {
+    } catch (_err) {
       // Simulate toggle in UI
       setTests(prev => prev.map(t => t.id === id ? { ...t, isActive: !currentStatus } : t));
     }
@@ -79,7 +79,7 @@ const TestBuilder = ({ onEditQuestions }) => {
       setSubject('');
       setTopic('');
       fetchTests();
-    } catch (err) {
+    } catch (_err) {
       // Mock insert on UI for demo if no backend running
       const newTest = {
         id: Math.random().toString(),
@@ -100,7 +100,7 @@ const TestBuilder = ({ onEditQuestions }) => {
     try {
       await api(`/tests/${id}`, { method: 'DELETE' });
       fetchTests();
-    } catch (err) {
+    } catch (_err) {
       setTests(prev => prev.filter(t => t.id !== id));
     }
   };
@@ -181,6 +181,7 @@ const TestBuilder = ({ onEditQuestions }) => {
               <button className="btn-close" onClick={() => setShowModal(false)}>×</button>
             </div>
             <form onSubmit={handleCreateTest}>
+              {error && <div className="error-message">{error}</div>}
               <div className="form-group">
                 <label>Test Title</label>
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. React Intermediate Mock" />

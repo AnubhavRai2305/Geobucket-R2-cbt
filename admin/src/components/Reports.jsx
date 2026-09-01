@@ -35,7 +35,7 @@ const Reports = () => {
 
       const attemptsData = await api(`/reports/tests/${selectedTestId}/attempts`);
       setAttempts(attemptsData.attempts || []);
-    } catch (err) {
+    } catch (_err) {
       setError('Showing template presentation logs.');
       // Mock metrics fallbacks for presentation
       setSummary({
@@ -95,6 +95,8 @@ const Reports = () => {
         </select>
         <button onClick={fetchReportData} className="btn btn-secondary">Refresh Report</button>
       </div>
+
+      {error && <div className="info-alert">{error}</div>}
 
       {loading ? (
         <div className="text-center">Loading analytics data...</div>

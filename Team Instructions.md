@@ -17,17 +17,19 @@
 
 ---
 
-## Action Items based on Anubhav's Progress (As of 2026-09-01)
+## Action Items & Integration Status (As of 2026-09-01)
 
-### For Anurag Shre (Module 1 - Backend)
-Anubhav has fully implemented the frontend security wrappers and anti-cheating hook (`useExamSecurity.js`), which now actively attempts to sync with the backend. 
-**Required Actions:**
-- **Implement `POST /api/attempts/:id/violations`**: The frontend is now rigorously reporting tab-switches, fullscreen exits, clipboard actions, and restricted keystrokes to this endpoint. You must build this route to track the `violationsCount` and return `isLocked: true` if the cheating threshold is exceeded.
-- **Implement Core Exam Routes**: The frontend is returning 404s for the remaining exam endpoints (`/api/tests`, `/api/attempts/start`, etc.). Please reference `todo.md` for the exact list of missing routes that must be completed so Anubhav and Jaya can integrate.
+### Status for Anurag Shre (Module 1 - Backend & Admin) - ✅ COMPLETED
+All required APIs and backend mechanics are fully implemented, enhanced, seeded, and tested:
+- **Violation Sync & Auto-Lock**: `POST /api/attempts/:id/violations` handles `tab_switch`, `fullscreen_exit`, `page_refresh`, `restricted_shortcut`, and `clipboard_action`, incrementing infraction counts and auto-locking when violations $\ge 3$.
+- **Session Recovery**: `GET /api/attempts/:id` is live for candidate attempt resumption and lock state synchronization.
+- **Exam Lifecycle**: `POST /api/attempts/start`, `PATCH /api/attempts/:id/answers`, and `POST /api/attempts/:id/submit` are tested and active.
+- **Polymorphic Question Delivery**: `GET /api/tests/:id/questions` strips `correctAnswer` for student tokens while returning full data for staff.
+- **Admin Dashboard**: React + Vite admin dashboard in `./admin/` is linted and built.
 
-### For Jaya Patel (Module 2 - Exam UI)
-Anubhav has completely built the `useExamSecurity` hook and the premium `LockoutScreen` overlay.
-**Required Actions:**
-- **Integrate the Security Hook**: In your main exam layout component, invoke `const { violationsCount, isLocked, startSecurityMonitoring } = useExamSecurity(attemptId);`.
-- **Start Monitoring**: Ensure you call `startSecurityMonitoring()` when the student officially begins the exam countdown.
-- **Render the Lockout UI**: You must conditionally render Anubhav's `LockoutScreen` component on top of your exam interface if `isLocked` evaluates to `true`. This will physically freeze the student's exam until an invigilator intervenes.
+### For Jaya Patel (Module 2 - Exam UI) & Anubhav Rai (Module 3 - Security & Results)
+The backend is completely operational and ready for your frontend integrations:
+1. **Connect Security**: In your main CBT layout, invoke `const { violationsCount, isLocked, startSecurityMonitoring } = useExamSecurity(attemptId);`.
+2. **Handle Lockout**: Conditionally render `<LockoutScreen violationsCount={violationsCount} />` when `isLocked === true`.
+3. **Question Display & Syncing**: Use `GET /api/tests/:id/questions` to render questions and `PATCH /api/attempts/:id/answers` to auto-save candidate selections.
+4. **Auto-Submit & Grading**: On timer expiry or candidate submission, call `POST /api/attempts/:id/submit` and render the backend-evaluated score breakdown.

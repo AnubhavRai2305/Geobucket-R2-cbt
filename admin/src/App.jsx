@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import './App.css';

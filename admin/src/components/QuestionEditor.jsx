@@ -15,6 +15,25 @@ const QuestionEditor = ({ test, onBack }) => {
   ]);
   const [correctAnswer, setCorrectAnswer] = useState(''); // String for MCQ, array for MSQ, number for NAT
 
+  const loadQuestionIntoEditor = (q) => {
+    setSelectedQuestion(q);
+    setType(q.type);
+    setContent(q.content);
+    setOptions(q.options && q.options.length > 0 ? q.options : [{ id: 'opt_1', text: '' }, { id: 'opt_2', text: '' }]);
+    setCorrectAnswer(q.correctAnswer);
+  };
+
+  const handleAddNewQuestionClick = () => {
+    setSelectedQuestion(null); // Indicates a new question
+    setType('MCQ');
+    setContent('');
+    setOptions([
+      { id: 'opt_1', text: '' },
+      { id: 'opt_2', text: '' }
+    ]);
+    setCorrectAnswer('');
+  };
+
   const fetchQuestions = async () => {
     setLoading(true);
     try {
@@ -58,25 +77,6 @@ const QuestionEditor = ({ test, onBack }) => {
   useEffect(() => {
     fetchQuestions();
   }, [test.id]);
-
-  const loadQuestionIntoEditor = (q) => {
-    setSelectedQuestion(q);
-    setType(q.type);
-    setContent(q.content);
-    setOptions(q.options && q.options.length > 0 ? q.options : [{ id: 'opt_1', text: '' }, { id: 'opt_2', text: '' }]);
-    setCorrectAnswer(q.correctAnswer);
-  };
-
-  const handleAddNewQuestionClick = () => {
-    setSelectedQuestion(null); // Indicates a new question
-    setType('MCQ');
-    setContent('');
-    setOptions([
-      { id: 'opt_1', text: '' },
-      { id: 'opt_2', text: '' }
-    ]);
-    setCorrectAnswer('');
-  };
 
   const handleAddOption = () => {
     const nextId = `opt_${options.length + 1}`;
@@ -139,7 +139,7 @@ const QuestionEditor = ({ test, onBack }) => {
         });
       }
       fetchQuestions();
-    } catch (err) {
+    } catch (_err) {
       // Simulate save in UI
       const mockSaved = {
         id: selectedQuestion ? selectedQuestion.id : Math.random().toString(),
@@ -159,7 +159,7 @@ const QuestionEditor = ({ test, onBack }) => {
     try {
       await api(`/questions/${id}`, { method: 'DELETE' });
       fetchQuestions();
-    } catch (err) {
+    } catch (_err) {
       setQuestions(prev => prev.filter(q => q.id !== id));
       handleAddNewQuestionClick();
     }

@@ -77,7 +77,7 @@ const Proctor = () => {
       await api(`/attempts/${attemptId}/unlock`, { method: 'POST' });
       fetchAttempts();
       setSelectedAttempt(null);
-    } catch (err) {
+    } catch (_err) {
       // Fallback unlock UI simulation
       setAttempts(prev => prev.map(a => a.attemptId === attemptId ? { ...a, status: 'active', violationsCount: 0, violations: [] } : a));
       setSelectedAttempt(null);

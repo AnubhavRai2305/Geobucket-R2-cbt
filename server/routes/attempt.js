@@ -15,6 +15,29 @@ const matchMSQ = (arr1, arr2) => {
   return sorted1.every((val, index) => val === sorted2[index]);
 };
 
+// @desc    Get attempt details by ID (for resumption and security check)
+// @route   GET /api/attempts/:id
+// @access  Private (Student who owns the attempt or Staff)
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const attempt = await ExamAttempt.findById(req.params.id);
+    if (!attempt) {
+      return res.status(404).json({ success: false, message: 'Attempt record not found.' });
+    }
+
+    if (req.userType === 'student' && attempt.studentId.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
+    const attemptData = attempt.toObject();
+    attemptData.violationsCount = attempt.securityViolations.length;
+
+    return res.json({ success: true, attempt: attemptData });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @desc    Start a test attempt
 // @route   POST /api/attempts/start
 // @access  Private (Student only)
@@ -53,7 +76,16 @@ router.post('/start', protect, async (req, res) => {
     if (attempt) {
       // Resume attempt if not expired
       if (new Date() < new Date(attempt.endTime) && attempt.status !== 'locked') {
-        return res.json({ success: true, message: 'Resuming active exam session.', attempt });
+        return res.json({
+          success: true,
+          message: 'Resuming active exam session.',
+          attemptId: attempt._id,
+          startTime: attempt.startTime,
+          endTime: attempt.endTime,
+          durationMinutes: test.durationMinutes,
+          status: attempt.status,
+          attempt
+        });
       }
       
       // Auto-lock if time exceeded but status was left active
@@ -85,7 +117,16 @@ router.post('/start', protect, async (req, res) => {
       securityViolations: []
     });
 
-    return res.status(201).json({ success: true, message: 'Exam session started.', attempt });
+    return res.status(201).json({
+      success: true,
+      message: 'Exam session started.',
+      attemptId: attempt._id,
+      startTime: attempt.startTime,
+      endTime: attempt.endTime,
+      durationMinutes: test.durationMinutes,
+      status: attempt.status,
+      attempt
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -133,13 +174,21 @@ router.patch('/:id/answers', protect, async (req, res) => {
   }
 });
 
-// @desc    Report fullscreen exits / tab switching
+// @desc    Report fullscreen exits / tab switching / restrictions
 // @route   POST /api/attempts/:id/violations
 // @access  Private (Student only)
 router.post('/:id/violations', protect, async (req, res) => {
   try {
     const { type, details } = req.body;
-    if (!type || !['fullscreen_exit', 'tab_switch'].includes(type)) {
+    const validViolationTypes = [
+      'fullscreen_exit',
+      'tab_switch',
+      'page_refresh',
+      'restricted_shortcut',
+      'clipboard_action'
+    ];
+
+    if (!type || !validViolationTypes.includes(type)) {
       return res.status(400).json({ success: false, message: 'Invalid violation type.' });
     }
 
@@ -169,7 +218,13 @@ router.post('/:id/violations', protect, async (req, res) => {
     }
 
     await attempt.save();
-    return res.json({ success: true, message: 'Infraction logged successfully.', attempt });
+    return res.json({
+      success: true,
+      message: 'Infraction logged successfully.',
+      violationsCount: attempt.securityViolations.length,
+      isLocked: attempt.status === 'locked',
+      attempt
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -248,7 +303,12 @@ router.post('/:id/submit', protect, async (req, res) => {
     };
 
     await attempt.save();
-    return res.json({ success: true, message: 'Exam submitted and graded successfully.', attempt });
+    return res.json({
+      success: true,
+      message: 'Exam submitted and evaluated successfully.',
+      evaluation: attempt.evaluation,
+      attempt
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
