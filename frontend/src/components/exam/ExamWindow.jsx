@@ -4,6 +4,8 @@ import { startAttempt, fetchQuestions, saveAnswer, submitExam } from '../../api/
 import Timer from './Timer';
 import Palette from './Palette';
 import QuestionPane from './QuestionPane';
+import { useExamSecurity } from '../../security/useExamSecurity';
+import { LockoutScreen } from '../../security/LockoutScreen';
 
 function ExamWindow() {
   const { testId } = useParams();
@@ -17,6 +19,9 @@ function ExamWindow() {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { [questionId]: { selectedAnswer: any, status: 'answered' | 'marked_for_review' | etc } }
+  const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+
+  const { violationsCount, isLocked, startSecurityMonitoring, stopSecurityMonitoring } = useExamSecurity(attemptData?.attempt?._id);
 
   useEffect(() => {
     const initExam = async () => {
@@ -38,6 +43,18 @@ function ExamWindow() {
     };
     initExam();
   }, [testId]);
+
+  useEffect(() => {
+    if (attemptData?.attempt?._id) {
+      startSecurityMonitoring();
+    }
+  }, [attemptData, startSecurityMonitoring]);
+
+  useEffect(() => {
+    return () => {
+      stopSecurityMonitoring();
+    };
+  }, [stopSecurityMonitoring]);
 
   const handleAnswerChange = (value) => {
     const currentQ = questions[currentIndex];
@@ -116,6 +133,8 @@ function ExamWindow() {
     if (!attemptData?.attempt?._id) return;
     try {
       setLoading(true);
+      setShowConfirmSubmit(false);
+      stopSecurityMonitoring();
       const res = await submitExam(attemptData.attempt._id);
       navigate('/results', { state: { evaluation: res.evaluation } });
     } catch (err) {
@@ -146,6 +165,30 @@ function ExamWindow() {
 
   return (
     <div className="panel-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {isLocked && <LockoutScreen violationsCount={violationsCount} />}
+      
+      {showConfirmSubmit && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-primary)', padding: '24px', borderRadius: '12px',
+            maxWidth: '400px', width: '100%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }}>
+            <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>Submit Exam?</h3>
+            <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
+              Are you sure you want to submit your exam? You won't be able to change your answers after submission.
+            </p>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              <button className="btn btn-outline" onClick={() => setShowConfirmSubmit(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSubmit}>Yes, Submit</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -209,11 +252,7 @@ function ExamWindow() {
             currentIndex={currentIndex}
             onSelect={(idx) => setCurrentIndex(idx)}
           />
-          <button className="btn btn-primary btn-block" style={{ backgroundColor: 'var(--color-success)', color: '#000' }} onClick={() => {
-            if (window.confirm("Are you sure you want to submit the exam?")) {
-              handleSubmit();
-            }
-          }}>
+          <button className="btn btn-primary btn-block" style={{ backgroundColor: 'var(--color-success)', color: '#000' }} onClick={() => setShowConfirmSubmit(true)}>
             Submit Final Exam
           </button>
         </div>

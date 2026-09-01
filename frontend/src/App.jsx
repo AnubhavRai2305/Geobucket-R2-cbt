@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TestList from './components/tests/TestList';
 import ExamWindow from './components/exam/ExamWindow';
 import ResultSheet from './components/results/ResultSheet';
+import { AuthProvider } from './security/AuthContext';
 import './App.css';
 
 function App() {
@@ -11,17 +12,19 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <div className="app-layout">
-        <main className="content-area">
-          <Routes>
-            <Route path="/" element={<TestList />} />
-            <Route path="/exam/:testId" element={<ExamWindow />} />
-            <Route path="/results" element={<ResultSheet />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="app-layout">
+          <main className="content-area">
+            <Routes>
+              <Route path="/" element={<TestList />} />
+              <Route path="/exam/:testId" element={<ExamWindow />} />
+              <Route path="/results" element={<ResultSheet />} />
+            </Routes>
+          </main>
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
