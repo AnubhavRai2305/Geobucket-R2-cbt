@@ -1,0 +1,118 @@
+.lockout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #f8fafc;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.lockout-container {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(220, 38, 38, 0.25), 0 0 0 1px rgba(239, 68, 68, 0.1);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lockout-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    animation: pulseLock 2s infinite ease-in-out;
+}
+
+.lockout-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.lockout-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    background: linear-gradient(to right, #f8fafc, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+}
+
+.lockout-message {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #94a3b8;
+    margin: 0 0 32px;
+}
+
+.lockout-stats {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    padding: 4px 12px;
+    border-radius: 8px;
+}
+
+.lockout-instructions {
+    font-size: 14px;
+    color: #64748b;
+    border-top: 1px solid #334155;
+    padding-top: 24px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes pulseLock {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
