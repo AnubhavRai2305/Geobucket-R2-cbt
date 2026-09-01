@@ -28,24 +28,24 @@ The backend Express server has been fully implemented, seeded, and tested. The f
 
 ### Security
 
-- [ ] **Fullscreen Entry**: Ensure the exam strictly enters fullscreen mode when the user clicks start, utilizing the Fullscreen API.
-- [ ] **Fullscreen Exit Detection**: Monitor `fullscreenchange` events to detect if the student minimizes or exits fullscreen during the exam.
-- [ ] **Tab/Window Switching Detection**: Monitor `visibilitychange` events to detect if the student opens another tab or window.
-- [ ] **Send Violations to Backend**: Immediately report detected cheating events to the server to track violation counts and potential lockouts.
+- [x] **Fullscreen Entry**: Ensure the exam strictly enters fullscreen mode when the user clicks start, utilizing the Fullscreen API.
+- [x] **Fullscreen Exit Detection**: Monitor `fullscreenchange` events to detect if the student minimizes or exits fullscreen during the exam.
+- [x] **Tab/Window Switching Detection**: Monitor `visibilitychange` events to detect if the student opens another tab or window.
+- [x] **Send Violations to Backend**: Immediately report detected cheating events to the server to track violation counts and potential lockouts.
   * Route: `POST /api/attempts/:id/violations`
   * Body: `{ "type": "fullscreen_exit", "details": "Context..." }`
-- [ ] **Auth Token Binding**: Automatically append the student's JWT to all API requests to ensure secure and authorized access.
-- [ ] **Lockout Handler**: Monitor backend responses from violation posts and flip the `isLocked` state if the limit is exceeded.
-- [ ] **Freeze Exam UI**: Render an unclosable lockout overlay over the exam interface when the `isLocked` state triggers.
-- [ ] **Block Keyboard When Locked**: Disable all keyboard event listeners when the student is locked out to prevent further interaction.
-- [ ] **Keyboard Restrictions**: Block restricted keyboard shortcuts (e.g., Alt+Tab, Ctrl+C) during the active exam session.
-- [ ] **Copy/Cut/Paste Restrictions**: Disable clipboard events (`copy`, `cut`, `paste`) on the document body to prevent plagiarism.
-- [ ] **Right-Click Restriction**: Block the context menu from opening by preventing default behavior on the `contextmenu` event.
-- [ ] **Refresh Handling**: Implement mechanisms (e.g., beforeunload warnings) to prevent accidental page refreshes that could interrupt the exam.
-- [ ] **Interruption/Resume Behavior**: Fetch the active attempt state on mount to seamlessly resume an exam if the page was accidentally refreshed.
-- [ ] **Listener Cleanup**: Properly remove all event listeners (`useEffect` cleanup) when the exam component unmounts to prevent memory leaks.
-- [ ] **Violation API Failure Handling**: Gracefully handle network failures when sending violations to ensure the exam isn't blocked by a lost connection.
-- [ ] **Security Lifecycle Testing**: Verify that the entire sequence of cheating triggers, network calls, and UI lockouts works flawlessly together.
+- [x] **Auth Token Binding**: Automatically append the student's JWT to all API requests to ensure secure and authorized access.
+- [x] **Lockout Handler**: Monitor backend responses from violation posts and flip the `isLocked` state if the limit is exceeded.
+- [x] **Freeze Exam UI**: Render an unclosable lockout overlay over the exam interface when the `isLocked` state triggers (Built `LockoutScreen`).
+- [x] **Block Keyboard When Locked**: Disable all keyboard event listeners when the student is locked out to prevent further interaction.
+- [x] **Keyboard Restrictions**: Block restricted keyboard shortcuts (e.g., Alt+Tab, Ctrl+C) during the active exam session.
+- [x] **Copy/Cut/Paste Restrictions**: Disable clipboard events (`copy`, `cut`, `paste`) on the document body to prevent plagiarism.
+- [x] **Right-Click Restriction**: Block the context menu from opening by preventing default behavior on the `contextmenu` event.
+- [x] **Refresh Handling**: Implement mechanisms (e.g., beforeunload warnings) to prevent accidental page refreshes that could interrupt the exam.
+- [x] **Interruption/Resume Behavior**: Fetch the active attempt state on mount to seamlessly resume an exam if the page was accidentally refreshed.
+- [x] **Listener Cleanup**: Properly remove all event listeners (`useEffect` cleanup) when the exam component unmounts to prevent memory leaks.
+- [x] **Violation API Failure Handling**: Gracefully handle network failures when sending violations to ensure the exam isn't blocked by a lost connection.
+- [x] **Security Lifecycle Testing**: Verify that the entire sequence of cheating triggers, network calls, and UI lockouts works flawlessly together.
 
 ### Submission & Results
 
@@ -81,6 +81,7 @@ The backend Express server has been fully implemented, seeded, and tested. The f
 - [ ] **Start Exam Session**: Call the start route on test launch:
   * Route: `POST /api/attempts/start` with body `{ "testId": "ObjectId" }`
   * Store the returned `attemptId` and compute the countdown duration using the `endTime` ISO timestamp.
+- [ ] **Security Lockout Integration**: Use Anubhav's `useExamSecurity` hook to get `isLocked` and conditionally render `<LockoutScreen violationsCount={violationsCount} />` over the exam interface if triggered.
 - [ ] **Fetch Secure Questions**: Load questions using:
   * Route: `GET /api/tests/:testId/questions`
   * *Notice*: The correct answers are omitted on this route. Do not perform any client-side grading.
