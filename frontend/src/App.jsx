@@ -8,7 +8,9 @@ import './App.css';
 
 function App() {
   React.useEffect(() => {
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhOTUxNWEyYmJlNDIxMzQyOGJkYjcwYSIsInVzZXJUeXBlIjoic3R1ZGVudCIsImlhdCI6MTc4ODE1Njk1OSwiZXhwIjoxNzkwNzQ4OTU5fQ.InjYecK0YhTV6HnS7rcvhjgukyNYwzoJviQJ-HKtli4');
+    const hardcodedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhOTUwY2E5YTAyN2UwNjRlNTZhZDdkNSIsInVzZXJUeXBlIjoic3R1ZGVudCIsImlhdCI6MTc4ODQzMDg4NiwiZXhwIjoxNzkxMDIyODg2fQ.9b1_oaH5d5gKuv1n4S6jSbNLEr-TZRK4zxfmTKQnIDQ';
+    localStorage.setItem('token', hardcodedToken);
+    localStorage.setItem('studentToken', hardcodedToken);
   }, []);
 
   return (

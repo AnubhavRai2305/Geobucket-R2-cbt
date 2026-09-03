@@ -99,3 +99,6 @@ The backend Express server has been fully implemented, seeded, and tested. The f
 - [x] **Auto-Submit on Timer Expiry**: When the countdown timer reaches zero, automatically call:
   * Route: `POST /api/attempts/:attemptId/submit`
   * Fetch and render the final score from the graded `evaluation` response block.
+
+## Module 4 - Admin Dashboard (Missing Features)
+- [ ] **Student Eligibility Assignment UI**: Build an interface in the admin panel to allow staff to assign active tests to specific students (pushing the `testId` to the student's `eligibleTests` array). Currently, tests created in the admin panel do not appear in the student portal because there is no way to assign them.

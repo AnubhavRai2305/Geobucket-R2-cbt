@@ -22,7 +22,8 @@ function ExamWindow() {
   const [draftAnswer, setDraftAnswer] = useState(null);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
-  const { violationsCount, isLocked, startSecurityMonitoring, stopSecurityMonitoring } = useExamSecurity(attemptData?.attempt?._id);
+  const attemptId = attemptData?.attemptId || attemptData?.attempt?._id;
+  const { violationsCount, isLocked, startSecurityMonitoring, stopSecurityMonitoring } = useExamSecurity(attemptId);
 
   useEffect(() => {
     const initExam = async () => {
@@ -55,10 +56,10 @@ function ExamWindow() {
   // We removed the on-mount auto-mark so it remains grey while currently viewing.
 
   useEffect(() => {
-    if (attemptData?.attempt?._id) {
+    if (attemptId) {
       startSecurityMonitoring();
     }
-  }, [attemptData, startSecurityMonitoring]);
+  }, [attemptId, startSecurityMonitoring]);
 
   useEffect(() => {
     return () => {
@@ -89,7 +90,7 @@ function ExamWindow() {
     }));
 
     // Save to backend
-    saveAnswer(attemptData.attempt._id, currentQ.id, valToSave, newStatus).catch(err => {
+    saveAnswer(attemptId, currentQ.id, valToSave, newStatus).catch(err => {
       console.error("Failed to auto-save answer:", err);
     });
   };
@@ -161,7 +162,7 @@ function ExamWindow() {
       setLoading(true);
       setShowConfirmSubmit(false);
       stopSecurityMonitoring();
-      const res = await submitExam(attemptData.attempt._id);
+      const res = await submitExam(attemptId);
       navigate('/results', { state: { evaluation: res.evaluation } });
     } catch (err) {
       alert("Failed to submit exam: " + err.message);
@@ -193,27 +194,62 @@ function ExamWindow() {
     <div className="panel-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {isLocked && <LockoutScreen violationsCount={violationsCount} />}
       
-      {showConfirmSubmit && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
+      {showConfirmSubmit && (() => {
+        const total = questions.length;
+        const attempted = Object.values(answers).filter(a => a.status === 'answered' || a.status === 'answered_and_marked').length;
+        const marked = Object.values(answers).filter(a => a.status === 'marked_for_review' || a.status === 'answered_and_marked').length;
+        const skipped = total - attempted;
+
+        return (
           <div style={{
-            backgroundColor: 'var(--bg-primary)', padding: '24px', borderRadius: '12px',
-            maxWidth: '400px', width: '100%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)'
           }}>
-            <h3 style={{ marginBottom: '16px', fontSize: '20px', fontWeight: 'bold' }}>Submit Exam?</h3>
-            <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
-              Are you sure you want to submit your exam? You won't be able to change your answers after submission.
-            </p>
-            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-              <button className="btn btn-outline" onClick={() => setShowConfirmSubmit(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSubmit}>Yes, Submit</button>
+            <div style={{
+              backgroundColor: 'var(--bg-primary)', padding: '32px', borderRadius: '16px',
+              maxWidth: '450px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-color)'
+            }}>
+              <h3 style={{ marginBottom: '8px', fontSize: '24px', fontWeight: 'bold' }}>Submit Exam?</h3>
+              <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
+                Please review your exam summary before final submission. You cannot change your answers after submitting.
+              </p>
+              
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', 
+                marginBottom: '24px', textAlign: 'left', padding: '16px', 
+                backgroundColor: 'var(--bg-secondary)', borderRadius: '12px'
+              }}>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Attempted</div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#10b981' }}>{attempted}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Skipped</div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#ef4444' }}>{skipped}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Marked for Review</div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#f59e0b' }}>{marked}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Security Violations</div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: violationsCount > 0 ? '#ef4444' : '#10b981' }}>
+                    {violationsCount} / 3
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+                <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowConfirmSubmit(false)}>Return to Exam</button>
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit}>Confirm Submit</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Header */}
       <div style={{
@@ -229,6 +265,42 @@ function ExamWindow() {
           <Timer endTime={attemptData?.attempt?.endTime} onExpire={handleSubmit} />
         </div>
       </div>
+
+      {/* Violation Warning Banner */}
+      {!isLocked && violationsCount > 0 && (
+        <div style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderLeft: '4px solid #ef4444',
+          borderBottom: '1px solid rgba(239, 68, 68, 0.2)',
+          color: '#ef4444',
+          padding: '12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontWeight: '500',
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span><strong>Warning:</strong> Security violation detected. Please remain in fullscreen and do not switch tabs.</span>
+          </div>
+          <div style={{
+            backgroundColor: '#ef4444',
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '999px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
+          }}>
+            {violationsCount}/3 Violations
+          </div>
+        </div>
+      )}
 
       {/* Main Workspace */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: '24px', gap: '24px' }}>

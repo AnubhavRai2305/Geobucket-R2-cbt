@@ -39,6 +39,8 @@ export const useExamSecurity = (attemptId) => {
     const reportViolation = useCallback(async (type, details) => {
         if (!attemptId || !token || isLocked) return;
 
+        console.log(`[Security Alert] Detected violation: ${type}. Sending to backend...`);
+
         const payload = { type, details, timestamp: new Date().toISOString() };
 
         const sendRequest = async (violationData) => {
@@ -55,17 +57,20 @@ export const useExamSecurity = (attemptId) => {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
+                        console.log(`[Security Alert] Backend acknowledged violation. Total count: ${data.violationsCount}`);
                         setViolationsCount(data.violationsCount);
                         if (data.isLocked) {
+                            console.warn(`[Security Alert] Exam is now LOCKED by the backend!`);
                             setIsLocked(true);
                             setExamActive(false);
                         }
                         return true;
                     }
                 }
+                console.error("[Security Alert] Backend rejected the violation report.", await response.text());
                 return false;
             } catch (error) {
-                console.error("Network error reporting violation:", error);
+                console.error("[Security Alert] Network error reporting violation:", error);
                 return false;
             }
         };
@@ -74,9 +79,11 @@ export const useExamSecurity = (attemptId) => {
         
         // Violation API Failure Handling: Queue failed requests
         if (!success) {
+            console.warn("[Security Alert] Queuing violation due to network failure.");
             failedViolationsQueue.current.push(payload);
         } else if (failedViolationsQueue.current.length > 0) {
             // If successful and we have a queue, try to flush the queue
+            console.log("[Security Alert] Flushing offline violation queue...");
             const queue = [...failedViolationsQueue.current];
             failedViolationsQueue.current = [];
             for (const queuedItem of queue) {
@@ -92,8 +99,12 @@ export const useExamSecurity = (attemptId) => {
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                console.warn(`[Security] Fullscreen requires user interaction: ${err.message}`);
             });
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen().catch(err => console.warn(err.message));
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen().catch(err => console.warn(err.message));
         }
     }, []);
 
@@ -115,18 +126,41 @@ export const useExamSecurity = (attemptId) => {
     useEffect(() => {
         if (!examActive || isLocked) return;
 
+        // 1. Tab & Window Switching Detection
         const handleVisibilityChange = () => {
             if (document.hidden) {
                 reportViolation('tab_switch', 'User switched tabs or minimized the browser window.');
             }
         };
 
+        const handleBlur = () => {
+            // Failsafe for ALT+TAB / Window losing focus even if not fully hidden
+            reportViolation('tab_switch', 'Window lost focus (ALT+TAB or clicked outside).');
+        };
+
+        // 2. Fullscreen Exit Detection
         const handleFullscreenChange = () => {
-            if (!document.fullscreenElement) {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            if (!isFullscreen) {
                 reportViolation('fullscreen_exit', 'User exited full-screen mode.');
+                // Aggressively attempt to force them back into fullscreen if they press escape
+                setTimeout(() => {
+                    if (examActive && !isLocked) {
+                        enterFullscreen();
+                    }
+                }, 100);
             }
         };
 
+        // 3. Force Fullscreen on First Click (Bypass browser gesture restrictions)
+        const enforceInitialFullscreen = () => {
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+            if (!isFullscreen && examActive && !isLocked) {
+                enterFullscreen();
+            }
+        };
+
+        // 4. Clipboard & Context Menu Restrictions
         const handleContextMenu = (e) => {
             e.preventDefault();
             reportViolation('restricted_shortcut', 'User attempted to open context menu.');
@@ -137,6 +171,7 @@ export const useExamSecurity = (attemptId) => {
             reportViolation('clipboard_action', `User attempted to ${e.type}.`);
         };
 
+        // 5. Keyboard Restrictions
         const handleKeyDown = (e) => {
             // Block common shortcuts like Ctrl+C, Ctrl+V, Alt+Tab, F12, PrintScreen
             if (
@@ -151,13 +186,22 @@ export const useExamSecurity = (attemptId) => {
             }
         };
 
+        // 6. Refresh Handling
         const handleBeforeUnload = (e) => {
             e.preventDefault();
             e.returnValue = ''; // Standard way to show prompt on refresh/close
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('blur', handleBlur);
+        
         document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        document.addEventListener('click', enforceInitialFullscreen);
+        
         document.addEventListener('contextmenu', handleContextMenu);
         document.addEventListener('copy', handleCopyPaste);
         document.addEventListener('cut', handleCopyPaste);
@@ -167,7 +211,15 @@ export const useExamSecurity = (attemptId) => {
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('blur', handleBlur);
+            
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+            
+            document.removeEventListener('click', enforceInitialFullscreen);
+            
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('copy', handleCopyPaste);
             document.removeEventListener('cut', handleCopyPaste);
@@ -175,16 +227,16 @@ export const useExamSecurity = (attemptId) => {
             document.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [examActive, isLocked, reportViolation]);
+    }, [examActive, isLocked, reportViolation, enterFullscreen]);
 
-    const startSecurityMonitoring = () => {
+    const startSecurityMonitoring = useCallback(() => {
         setExamActive(true);
         enterFullscreen();
-    };
+    }, [enterFullscreen]);
 
-    const stopSecurityMonitoring = () => {
+    const stopSecurityMonitoring = useCallback(() => {
         setExamActive(false);
-    };
+    }, []);
 
     return {
         violationsCount,
