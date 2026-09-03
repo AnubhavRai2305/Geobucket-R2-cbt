@@ -116,9 +116,47 @@ router.post('/staff/login', async (req, res) => {
   }
 });
 
-// @desc    Register a student (For testing / admin setup)
-// @route   POST /api/auth/student/register
-// @access  Staff Only (Admin, Teacher)
+// @desc    Register a student publicly
+// @route   POST /api/auth/student/public-register
+// @access  Public
+router.post('/student/public-register', async (req, res) => {
+  const { name, email, rollNumber, password } = req.body;
+
+  try {
+    const studentExists = await Student.findOne({ $or: [{ email }, { rollNumber }] });
+    if (studentExists) {
+      return res.status(400).json({ success: false, message: 'Student with this email or roll number already exists' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newStudent = await Student.create({
+      name,
+      email,
+      rollNumber,
+      passwordHash,
+      eligibleTests: [],
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Student registered successfully.',
+      token: generateToken(newStudent._id, 'student'),
+      student: {
+        id: newStudent._id,
+        name: newStudent.name,
+        email: newStudent.email,
+        rollNumber: newStudent.rollNumber,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
 router.post('/student/register', protect, requireRole(['admin', 'teacher']), async (req, res) => {
   const { name, email, rollNumber, password, eligibleTests } = req.body;
 

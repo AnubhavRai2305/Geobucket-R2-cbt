@@ -5,6 +5,21 @@ function ResultSheet() {
   const location = useLocation();
   const navigate = useNavigate();
   const evaluation = location.state?.evaluation;
+  const resultsPublished = location.state?.resultsPublished;
+
+  if (resultsPublished === false) {
+    return (
+      <div className="panel-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <div className="login-form" style={{ maxWidth: '600px', textAlign: 'center' }}>
+          <h2>Exam Submitted Successfully!</h2>
+          <p className="subtitle" style={{ marginBottom: '32px' }}>Results will be published later by your instructor.</p>
+          <button className="btn btn-primary btn-block" onClick={() => navigate('/')}>
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!evaluation) {
     return (
