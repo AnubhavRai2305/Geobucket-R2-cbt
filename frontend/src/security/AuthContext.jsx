@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { loginStudent, getCurrentStudent } from './authService';
+import { loginStudent, getCurrentStudent, registerStudent } from './authService';
 
 export const AuthContext = createContext(null);
 
@@ -40,6 +40,16 @@ export const AuthProvider = ({ children }) => {
         return data;
     };
 
+    const register = async (name, email, rollNumber, password) => {
+        const data = await registerStudent(name, email, rollNumber, password);
+        if (data.success && data.token) {
+            setToken(data.token);
+            setUser(data.student);
+            localStorage.setItem('studentToken', data.token);
+        }
+        return data;
+    };
+
     const logout = () => {
         setToken(null);
         setUser(null);
@@ -47,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

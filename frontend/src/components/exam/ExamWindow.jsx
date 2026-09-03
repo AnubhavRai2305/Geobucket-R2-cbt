@@ -163,7 +163,7 @@ function ExamWindow() {
       setShowConfirmSubmit(false);
       stopSecurityMonitoring();
       const res = await submitExam(attemptId);
-      navigate('/results', { state: { evaluation: res.evaluation } });
+      navigate('/results', { state: { evaluation: res.evaluation, resultsPublished: res.resultsPublished } });
     } catch (err) {
       alert("Failed to submit exam: " + err.message);
       setLoading(false);
@@ -338,8 +338,8 @@ function ExamWindow() {
               <button className="btn btn-secondary" onClick={handlePrev} disabled={currentIndex === 0}>
                 Previous
               </button>
-              <button className="btn btn-primary" onClick={handleSaveAndNext} disabled={currentIndex === questions.length - 1}>
-                Save & Next
+              <button className="btn btn-primary" onClick={handleSaveAndNext}>
+                {currentIndex === questions.length - 1 ? 'Save' : 'Save & Next'}
               </button>
             </div>
           </div>

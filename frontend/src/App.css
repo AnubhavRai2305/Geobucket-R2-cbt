@@ -1,6 +1,6 @@
-/* App Layout */
 .app-layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
   background-color: var(--bg-primary);
@@ -780,5 +780,4 @@
 .metric-card.danger h3 {
   color: var(--color-danger);
 }
-@ k e y f r a m e s   s l i d e D o w n   {   f r o m   {   t r a n s f o r m :   t r a n s l a t e Y ( - 1 0 p x ) ;   o p a c i t y :   0 ;   }   t o   {   t r a n s f o r m :   t r a n s l a t e Y ( 0 ) ;   o p a c i t y :   1 ;   }   }  
- 
+@keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

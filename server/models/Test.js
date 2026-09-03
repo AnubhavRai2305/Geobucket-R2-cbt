@@ -14,6 +14,7 @@ const testSchema = new mongoose.Schema({
   language: { type: String, default: 'English' },
   durationMinutes: { type: Number, required: true },
   isActive: { type: Boolean, default: false },
+  resultsPublished: { type: Boolean, default: false },
   markingScheme: {
     MCQ: { type: markingSchemeSchema, default: () => ({ correct: 4, incorrect: -1, unattempted: 0 }) },
     MSQ: { type: markingSchemeSchema, default: () => ({ correct: 4, incorrect: 0, unattempted: 0 }) },
