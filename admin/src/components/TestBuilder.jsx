@@ -49,6 +49,18 @@ const TestBuilder = ({ onEditQuestions }) => {
     }
   };
 
+  const handleTogglePublish = async (id, currentStatus) => {
+    try {
+      await api(`/tests/${id}/publish`, {
+        method: 'PATCH',
+      });
+      fetchTests();
+    } catch (_err) {
+      // Simulate toggle in UI
+      setTests(prev => prev.map(t => t.id === id ? { ...t, resultsPublished: !currentStatus } : t));
+    }
+  };
+
   const handleCreateTest = async (e) => {
     e.preventDefault();
     setError('');
@@ -152,6 +164,12 @@ const TestBuilder = ({ onEditQuestions }) => {
                         className="btn btn-sm btn-outline"
                       >
                         Edit Questions
+                      </button>
+                      <button
+                        onClick={() => handleTogglePublish(test.id, test.resultsPublished)}
+                        className={`btn btn-sm ${test.resultsPublished ? 'btn-outline-danger' : 'btn-primary'}`}
+                      >
+                        {test.resultsPublished ? 'Hide Results' : 'Publish Results'}
                       </button>
                       <button
                         onClick={() => handleDeleteTest(test.id)}

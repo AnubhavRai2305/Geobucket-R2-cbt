@@ -1,7 +1,7 @@
 const API_BASE = '/api';
 
 function getAuthHeaders() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -13,6 +13,14 @@ export const fetchTests = async () => {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to fetch tests');
+  return response.json();
+};
+
+export const fetchTestDetails = async (testId) => {
+  const response = await fetch(`${API_BASE}/tests/${testId}`, {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch test details');
   return response.json();
 };
 
@@ -50,5 +58,13 @@ export const submitExam = async (attemptId) => {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to submit exam');
+  return response.json();
+};
+
+export const fetchMyAttempts = async () => {
+  const response = await fetch(`${API_BASE}/attempts/my-attempts`, {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) throw new Error('Failed to fetch past attempts');
   return response.json();
 };

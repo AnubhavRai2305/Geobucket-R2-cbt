@@ -3,13 +3,14 @@ import React from 'react';
 function Palette({ questions, answers, currentIndex, onSelect }) {
   const getStatusClass = (questionId) => {
     const ans = answers[questionId];
-    if (!ans) return 'status-inactive';
+    if (!ans) return 'palette-not-visited';
     switch (ans.status) {
-      case 'answered': return 'status-active';
-      case 'marked_for_review': return 'status-locked';
-      case 'answered_and_marked': return 'status-submitted';
+      case 'answered': return 'palette-answered';
+      case 'marked_for_review': return 'palette-marked';
+      case 'answered_and_marked': return 'palette-answered-marked';
+      case 'not_answered': return 'palette-not-answered';
       case 'not_visited':
-      default: return 'status-inactive';
+      default: return 'palette-not-visited';
     }
   };
 
@@ -41,11 +42,9 @@ function Palette({ questions, answers, currentIndex, onSelect }) {
                 justifyContent: 'center',
                 fontWeight: '700',
                 cursor: 'pointer',
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
                 transition: 'all 0.2s'
               }}
-              className={statusClass}
+              className={`palette-btn ${statusClass}`}
             >
               {index + 1}
             </button>
@@ -55,20 +54,24 @@ function Palette({ questions, answers, currentIndex, onSelect }) {
 
       <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px', fontSize: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div className="status-active" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
+          <div className="palette-answered" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
           <span>Answered</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div className="status-locked" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
-          <span>Marked for Review</span>
+          <div className="palette-not-answered" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
+          <span>Not Answered</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div className="status-submitted" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
-          <span>Answered & Marked</span>
+          <div className="palette-not-visited" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
+          <span>Not Visited</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <div className="palette-marked" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
+          <span>Marked for Review</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div className="status-inactive" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
-          <span>Not Visited</span>
+          <div className="palette-answered-marked" style={{ width: '16px', height: '16px', borderRadius: '4px' }}></div>
+          <span>Answered & Marked for Review</span>
         </div>
       </div>
     </div>

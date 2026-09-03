@@ -1,6 +1,6 @@
-/* App Layout */
 .app-layout {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
   background-color: var(--bg-primary);
@@ -438,6 +438,49 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+/* Question Palette Colors */
+.palette-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.palette-not-visited { background-color: #F0F0F0; color: #475569; border: 1px solid #cbd5e1 !important; }
+.palette-not-answered { background-color: #ef4444; color: #ffffff; border: 1px solid #ef4444 !important; }
+.palette-answered { background-color: #22c55e; color: #ffffff; border: 1px solid #22c55e !important; }
+.palette-marked { background-color: #5A4BDA; color: #ffffff; border: 1px solid #5A4BDA !important; }
+.palette-answered-marked { background-color: #5A4BDA; color: #ffffff; border: 1px solid #5A4BDA !important; position: relative; }
+.palette-answered-marked::after {
+  content: '✔';
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background-color: #22c55e;
+  color: white;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid white;
+}
+
+.submit-exam-btn {
+  background-color: #F0F0F0;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 8px;
+}
+.submit-exam-btn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
 .sidebar-title-row {
   display: flex;
   justify-content: space-between;
@@ -737,3 +780,4 @@
 .metric-card.danger h3 {
   color: var(--color-danger);
 }
+@keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

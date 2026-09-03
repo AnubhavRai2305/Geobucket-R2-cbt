@@ -15,6 +15,31 @@ const matchMSQ = (arr1, arr2) => {
   return sorted1.every((val, index) => val === sorted2[index]);
 };
 
+// @desc    Get all attempts for the current student
+// @route   GET /api/attempts/my-attempts
+// @access  Private (Student only)
+router.get('/my-attempts', protect, async (req, res) => {
+  if (req.userType !== 'student') return res.status(403).json({ success: false, message: 'Access denied' });
+  try {
+    const attempts = await ExamAttempt.find({ studentId: req.user.id })
+      .populate('testId', 'title subject resultsPublished durationMinutes')
+      .sort({ createdAt: -1 });
+
+    // Scrub evaluation if results are not published
+    const sanitizedAttempts = attempts.map(a => {
+       const obj = a.toObject();
+       if (obj.testId && !obj.testId.resultsPublished) {
+           delete obj.evaluation;
+       }
+       return obj;
+    });
+
+    return res.json({ success: true, attempts: sanitizedAttempts });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // @desc    Get attempt details by ID (for resumption and security check)
 // @route   GET /api/attempts/:id
 // @access  Private (Student who owns the attempt or Staff)
@@ -305,8 +330,9 @@ router.post('/:id/submit', protect, async (req, res) => {
     await attempt.save();
     return res.json({
       success: true,
-      message: 'Exam submitted and evaluated successfully.',
-      evaluation: attempt.evaluation,
+      message: 'Exam submitted successfully.',
+      evaluation: test.resultsPublished ? attempt.evaluation : undefined,
+      resultsPublished: test.resultsPublished,
       attempt
     });
   } catch (error) {

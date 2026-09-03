@@ -31,6 +31,21 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
+// @desc    Get a single test by id
+// @route   GET /api/tests/:id
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Test not found.' });
+    }
+    return res.json({ success: true, test });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @desc    Create a new test module
 // @route   POST /api/tests
 // @access  Private (Staff - admin, teacher)
@@ -69,6 +84,25 @@ router.patch('/:id/toggle', protect, requireRole(['admin', 'teacher']), async (r
     await test.save();
     
     return res.json({ success: true, isActive: test.isActive, message: `Test status toggled to ${test.isActive ? 'Active' : 'Inactive'}.`, test });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Toggle test results publication status
+// @route   PATCH /api/tests/:id/publish
+// @access  Private (Staff - admin, teacher)
+router.patch('/:id/publish', protect, requireRole(['admin', 'teacher']), async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id);
+    if (!test) {
+      return res.status(404).json({ success: false, message: 'Test not found.' });
+    }
+    
+    test.resultsPublished = !test.resultsPublished;
+    await test.save();
+    
+    return res.json({ success: true, resultsPublished: test.resultsPublished, message: `Test results are now ${test.resultsPublished ? 'Published' : 'Hidden'}.`, test });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

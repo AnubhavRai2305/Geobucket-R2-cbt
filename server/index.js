@@ -7,6 +7,7 @@ import testRoutes from './routes/test.js';
 import questionRoutes from './routes/question.js';
 import attemptRoutes from './routes/attempt.js';
 import reportRoutes from './routes/report.js';
+import studentRoutes from './routes/student.js';
 
 // Load env variables
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/tests', testRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/attempts', attemptRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/students', studentRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

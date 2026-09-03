@@ -8,6 +8,7 @@ const Proctor = lazy(() => import('./components/Proctor'));
 const TestBuilder = lazy(() => import('./components/TestBuilder'));
 const QuestionEditor = lazy(() => import('./components/QuestionEditor'));
 const Reports = lazy(() => import('./components/Reports'));
+const StudentManager = lazy(() => import('./components/StudentManager'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -101,6 +102,10 @@ function App() {
 
           {currentView === 'reports' && (
             <Reports />
+          )}
+
+          {currentView === 'student-manager' && role !== 'counsellor' && (
+            <StudentManager />
           )}
         </Suspense>
       </main>

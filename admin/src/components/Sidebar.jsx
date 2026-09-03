@@ -12,14 +12,24 @@ const Sidebar = ({ currentView, onViewChange, role, name, onLogout }) => {
       <nav className="sidebar-nav">
         <ul>
           {role !== 'counsellor' && (
-            <li>
-              <button
-                className={`nav-btn ${currentView === 'test-builder' ? 'active' : ''}`}
-                onClick={() => onViewChange('test-builder')}
-              >
-                Test Builder
-              </button>
-            </li>
+            <>
+              <li>
+                <button
+                  className={`nav-btn ${currentView === 'test-builder' ? 'active' : ''}`}
+                  onClick={() => onViewChange('test-builder')}
+                >
+                  Test Builder
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`nav-btn ${currentView === 'student-manager' ? 'active' : ''}`}
+                  onClick={() => onViewChange('student-manager')}
+                >
+                  Student Management
+                </button>
+              </li>
+            </>
           )}
           <li>
             <button
