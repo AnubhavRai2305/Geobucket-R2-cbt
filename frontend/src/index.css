@@ -1,16 +1,16 @@
 :root {
-  --bg-primary: #12121a; /* Mature deep charcoal-indigo */
-  --bg-secondary: #1a1a26; /* Soft dusty navy-slate */
-  --bg-accent: #252538; /* Lighter card background */
-  --text-primary: #e4e4eb; /* Soft off-white */
-  --text-secondary: #a2a2bd; /* Comfortable lavender-grey secondary text */
-  --text-muted: #73738e; /* Muted slate for captions */
-  --color-primary: #b0c2de; /* Muted pastel steel-blue */
-  --color-primary-hover: #9bb0cf; /* Deeper pastel blue on hover */
-  --color-success: #a8d5c4; /* Soft pastel sage green */
-  --color-warning: #f5cfb3; /* Soft pastel peach */
-  --color-danger: #e2a6a6; /* Soft pastel dusty rose */
-  --border-color: #2b2b3d; /* Subtle dark border */
+  --bg-primary: #f8fafc; /* Light off-white background */
+  --bg-secondary: #ffffff; /* White card background */
+  --bg-accent: #f1f5f9; /* Slightly darker off-white for hover/accent */
+  --text-primary: #0f172a; /* Dark slate text */
+  --text-secondary: #475569; /* Medium slate text */
+  --text-muted: #94a3b8; /* Muted slate for captions */
+  --color-primary: #5A4BDA; /* Deep rich purple */
+  --color-primary-hover: #4b3db1; /* Slightly darker purple on hover */
+  --color-success: #10b981; /* Vibrant green */
+  --color-warning: #f59e0b; /* Vibrant amber */
+  --color-danger: #ef4444; /* Vibrant red */
+  --border-color: #e2e8f0; /* Light gray border */
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, SF Pro Mono, Menlo, Monaco, Consolas, monospace;
 }

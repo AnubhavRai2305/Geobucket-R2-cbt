@@ -19,6 +19,7 @@ function ExamWindow() {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { [questionId]: { selectedAnswer: any, status: 'answered' | 'marked_for_review' | etc } }
+  const [draftAnswer, setDraftAnswer] = useState(null);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
   const { violationsCount, isLocked, startSecurityMonitoring, stopSecurityMonitoring } = useExamSecurity(attemptData?.attempt?._id);
@@ -45,6 +46,15 @@ function ExamWindow() {
   }, [testId]);
 
   useEffect(() => {
+    if (questions.length > 0) {
+      const currentQ = questions[currentIndex];
+      setDraftAnswer(answers[currentQ.id]?.selectedAnswer || null);
+    }
+  }, [currentIndex, questions, answers]);
+
+  // We removed the on-mount auto-mark so it remains grey while currently viewing.
+
+  useEffect(() => {
     if (attemptData?.attempt?._id) {
       startSecurityMonitoring();
     }
@@ -57,54 +67,36 @@ function ExamWindow() {
   }, [stopSecurityMonitoring]);
 
   const handleAnswerChange = (value) => {
-    const currentQ = questions[currentIndex];
-    
-    // Auto-save logic
-    const newStatus = answers[currentQ.id]?.status === 'marked_for_review' || answers[currentQ.id]?.status === 'answered_and_marked'
-      ? 'answered_and_marked' 
-      : 'answered';
-
-    const newAnswer = {
-      selectedAnswer: value,
-      status: newStatus
-    };
-
-    setAnswers(prev => ({
-      ...prev,
-      [currentQ.id]: newAnswer
-    }));
-
-        // Save to backend asynchronously
-    saveAnswer(attemptData.attempt._id, currentQ.id, value, newStatus).catch(err => {
-      console.error("Failed to auto-save answer:", err);
-    });
+    setDraftAnswer(value);
   };
 
   const handleMarkForReview = () => {
     const currentQ = questions[currentIndex];
-    const currentAns = answers[currentQ.id];
     
     let newStatus = 'marked_for_review';
-    if (currentAns?.selectedAnswer) {
+    let valToSave = draftAnswer;
+
+    if (valToSave !== null) {
       newStatus = 'answered_and_marked';
     }
 
     setAnswers(prev => ({
       ...prev,
       [currentQ.id]: {
-        ...prev[currentQ.id],
+        selectedAnswer: valToSave,
         status: newStatus
       }
     }));
 
     // Save to backend
-    saveAnswer(attemptData.attempt._id, currentQ.id, currentAns?.selectedAnswer, newStatus).catch(err => {
+    saveAnswer(attemptData.attempt._id, currentQ.id, valToSave, newStatus).catch(err => {
       console.error("Failed to auto-save answer:", err);
     });
   };
 
   const handleClearResponse = () => {
     const currentQ = questions[currentIndex];
+    setDraftAnswer(null);
     setAnswers(prev => {
       const next = { ...prev };
       delete next[currentQ.id];
@@ -117,13 +109,47 @@ function ExamWindow() {
     });
   };
 
-  const handleNext = () => {
+  const markAsNotAnswered = () => {
+    const currentQ = questions[currentIndex];
+    if (!currentQ) return;
+    setAnswers(prev => {
+      if (!prev[currentQ.id]) {
+        return { ...prev, [currentQ.id]: { selectedAnswer: null, status: 'not_answered' } };
+      }
+      return prev;
+    });
+  };
+
+  const handleSaveAndNext = () => {
+    const currentQ = questions[currentIndex];
+    
+    if (draftAnswer !== null) {
+      const newStatus = answers[currentQ.id]?.status === 'marked_for_review' || answers[currentQ.id]?.status === 'answered_and_marked'
+        ? 'answered_and_marked' 
+        : 'answered';
+
+      setAnswers(prev => ({
+        ...prev,
+        [currentQ.id]: {
+          selectedAnswer: draftAnswer,
+          status: newStatus
+        }
+      }));
+      
+      saveAnswer(attemptData.attempt._id, currentQ.id, draftAnswer, newStatus).catch(err => {
+        console.error("Failed to auto-save answer:", err);
+      });
+    } else {
+      markAsNotAnswered();
+    }
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     }
   };
 
   const handlePrev = () => {
+    markAsNotAnswered();
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
     }
@@ -164,7 +190,7 @@ function ExamWindow() {
   const currentQ = questions[currentIndex];
 
   return (
-    <div className="panel-container" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="panel-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {isLocked && <LockoutScreen violationsCount={violationsCount} />}
       
       {showConfirmSubmit && (
@@ -208,12 +234,14 @@ function ExamWindow() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: '24px', gap: '24px' }}>
         
         {/* Left: Question Pane */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <QuestionPane 
-            question={currentQ} 
-            currentAnswer={answers[currentQ?.id]?.selectedAnswer}
-            onChange={handleAnswerChange}
-          />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '12px' }}>
+            <QuestionPane 
+              question={currentQ} 
+              currentAnswer={draftAnswer}
+              onChange={handleAnswerChange}
+            />
+          </div>
           
           {/* Action Footer */}
           <div style={{
@@ -222,7 +250,8 @@ function ExamWindow() {
             alignItems: 'center',
             marginTop: '24px',
             paddingTop: '20px',
-            borderTop: '1px solid var(--border-color)'
+            borderTop: '1px solid var(--border-color)',
+            flexShrink: 0
           }}>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button className="btn btn-outline" onClick={handleMarkForReview}>
@@ -237,7 +266,7 @@ function ExamWindow() {
               <button className="btn btn-secondary" onClick={handlePrev} disabled={currentIndex === 0}>
                 Previous
               </button>
-              <button className="btn btn-primary" onClick={handleNext} disabled={currentIndex === questions.length - 1}>
+              <button className="btn btn-primary" onClick={handleSaveAndNext} disabled={currentIndex === questions.length - 1}>
                 Save & Next
               </button>
             </div>
@@ -245,14 +274,19 @@ function ExamWindow() {
         </div>
 
         {/* Right: Palette */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Palette 
-            questions={questions}
-            answers={answers}
-            currentIndex={currentIndex}
-            onSelect={(idx) => setCurrentIndex(idx)}
-          />
-          <button className="btn btn-primary btn-block" style={{ backgroundColor: 'var(--color-success)', color: '#000' }} onClick={() => setShowConfirmSubmit(true)}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flexShrink: 0, overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            <Palette 
+              questions={questions}
+              answers={answers}
+              currentIndex={currentIndex}
+              onSelect={(idx) => {
+                markAsNotAnswered();
+                setCurrentIndex(idx);
+              }}
+            />
+          </div>
+          <button className="submit-exam-btn" style={{ width: '100%', flexShrink: 0 }} onClick={() => setShowConfirmSubmit(true)}>
             Submit Final Exam
           </button>
         </div>
