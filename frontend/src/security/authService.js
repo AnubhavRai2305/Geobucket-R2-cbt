@@ -1,11 +1,11 @@
-const API_BASE_URL = '/api/auth';
+import { API_BASE_URL } from '../api/apiConfig';
 
 /**
  * Authenticates a student via roll number and password.
  * Maps to: POST /api/auth/student/login
  */
 export const loginStudent = async (rollNumber, password) => {
-    const response = await fetch(`${API_BASE_URL}/student/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/student/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -25,7 +25,7 @@ export const loginStudent = async (rollNumber, password) => {
  * Maps to: GET /api/auth/me
  */
 export const getCurrentStudent = async (token) => {
-    const response = await fetch(`${API_BASE_URL}/me`, {
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`

@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+import { API_BASE_URL } from './apiConfig';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
@@ -9,7 +9,7 @@ function getAuthHeaders() {
 }
 
 export const fetchTests = async () => {
-  const response = await fetch(`${API_BASE}/tests`, {
+  const response = await fetch(`${API_BASE_URL}/tests`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to fetch tests');
@@ -25,7 +25,7 @@ export const fetchTestDetails = async (testId) => {
 };
 
 export const startAttempt = async (testId) => {
-  const response = await fetch(`${API_BASE}/attempts/start`, {
+  const response = await fetch(`${API_BASE_URL}/attempts/start`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ testId })
@@ -35,7 +35,7 @@ export const startAttempt = async (testId) => {
 };
 
 export const fetchQuestions = async (testId) => {
-  const response = await fetch(`${API_BASE}/tests/${testId}/questions`, {
+  const response = await fetch(`${API_BASE_URL}/tests/${testId}/questions`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to fetch questions');
@@ -43,7 +43,7 @@ export const fetchQuestions = async (testId) => {
 };
 
 export const saveAnswer = async (attemptId, questionId, selectedAnswer, status) => {
-  const response = await fetch(`${API_BASE}/attempts/${attemptId}/answers`, {
+  const response = await fetch(`${API_BASE_URL}/attempts/${attemptId}/answers`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
     body: JSON.stringify({ questionId, selectedAnswer, status })
@@ -53,7 +53,7 @@ export const saveAnswer = async (attemptId, questionId, selectedAnswer, status) 
 };
 
 export const submitExam = async (attemptId) => {
-  const response = await fetch(`${API_BASE}/attempts/${attemptId}/submit`, {
+  const response = await fetch(`${API_BASE_URL}/attempts/${attemptId}/submit`, {
     method: 'POST',
     headers: getAuthHeaders()
   });

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
+import { API_BASE_URL } from '../api/apiConfig';
 
 export const useExamSecurity = (attemptId) => {
     const { token } = useAuth();
@@ -15,7 +16,7 @@ export const useExamSecurity = (attemptId) => {
         const fetchAttemptStatus = async () => {
             if (!attemptId || !token) return;
             try {
-                const response = await fetch(`/api/attempts/${attemptId}`, {
+                const response = await fetch(`${API_BASE_URL}/attempts/${attemptId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -45,7 +46,7 @@ export const useExamSecurity = (attemptId) => {
 
         const sendRequest = async (violationData) => {
             try {
-                const response = await fetch(`/api/attempts/${attemptId}/violations`, {
+                const response = await fetch(`${API_BASE_URL}/attempts/${attemptId}/violations`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

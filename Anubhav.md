@@ -17,3 +17,7 @@
   - Engineered an **Interruption/Resume system** that fetches the current attempt status on mount to seamlessly restore lock states if the student forces a reload.
   - Implemented a **Violation API Failure Handler** that queues failed POST requests locally and recursively flushes them when the network reconnects.
 - Designed and built `LockoutScreen.jsx` & `LockoutScreen.css`, a premium glassmorphism UI overlay that conditionally renders when the backend locks the student's exam.
+
+### Date: 2026-09-04
+- Updated `authService.js` and `useExamSecurity.js` to dynamically route API requests through `API_BASE_URL` (supporting `VITE_API_URL` for Vercel deployment pointing to Render).
+- Verified production build compatibility for all security components (`npm run build`).

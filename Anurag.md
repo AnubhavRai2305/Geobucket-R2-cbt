@@ -25,3 +25,12 @@
 - Standardized response payloads across `POST /api/attempts/start`, `POST /api/attempts/:id/submit`, `POST /api/tests`, and `POST /api/tests/:id/questions`.
 - Configured ESLint and resolved component lint issues in the Admin Dashboard (`admin/`), confirming clean production build (`npm run build`).
 - Wrote and executed an end-to-end automated test suite verifying all 28 API assertions (auth, polymorphic question retrieval with stripped answers for students, security violation auto-lockouts, staff unlocking, grading evaluations, and reporting aggregations).
+
+# 4th September, 2026.
+- Configured MongoDB Atlas cloud database cluster (`geobucket-cbt`).
+- Connected backend Mongoose ODM to MongoDB Atlas and executed `npm run seed` to populate staff, students, tests, questions, and sample historical exam attempt logs.
+- Added production environment variable support (`VITE_API_URL`) to both the Admin Portal (`admin/src/utils/api.js`) and Student Testing Frontend (`frontend/src/api/apiConfig.js`).
+- Added `vercel.json` SPA rewrite rules to both `admin/` and `frontend/` to support React Router client-side routing on Vercel without 404s.
+- Created `render.yaml` Blueprint specification for deploying the backend API as a Node.js Web Service on Render.
+- Executed production builds (`npm run build`) on both frontends to verify zero bundle errors.
+- Updated all project documentation (`README.md`, `project_overview.md`, `todo.md`, `Team Instructions.md`, `api.md`).

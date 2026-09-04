@@ -426,3 +426,18 @@ Triggered when the client detects tab switching, exiting full-screen, or restric
     ]
   }
   ```
+
+---
+
+## 4. System & Health Check
+
+### Health Check (Render Liveness Probe)
+* **Endpoint**: `GET /health`
+* **Access**: Public
+* **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Server is running."
+  }
+  ```
