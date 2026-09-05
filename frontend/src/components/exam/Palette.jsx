@@ -1,4 +1,3 @@
-import React from 'react';
 
 function Palette({ questions, answers, currentIndex, onSelect }) {
   const getStatusClass = (questionId) => {

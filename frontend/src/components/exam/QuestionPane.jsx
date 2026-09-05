@@ -1,4 +1,3 @@
-import React from 'react';
 
 function QuestionPane({ question, currentAnswer, onChange }) {
   if (!question) return null;

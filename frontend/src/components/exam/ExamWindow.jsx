@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { startAttempt, fetchQuestions, saveAnswer, submitExam } from '../../api/examService';
 import Timer from './Timer';
@@ -19,10 +19,10 @@ function ExamWindow() {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { [questionId]: { selectedAnswer: any, status: 'answered' | 'marked_for_review' | etc } }
-  const [draftAnswer, setDraftAnswer] = useState(null);
+  const [draftAnswers, setDraftAnswers] = useState({});
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
 
-  const attemptId = attemptData?.attemptId || attemptData?.attempt?._id;
+  const attemptId = attemptData?.attemptId || attemptData?.attempt?._id || attemptData?._id;
   const { violationsCount, isLocked, startSecurityMonitoring, stopSecurityMonitoring } = useExamSecurity(attemptId);
 
   useEffect(() => {
@@ -47,15 +47,6 @@ function ExamWindow() {
   }, [testId]);
 
   useEffect(() => {
-    if (questions.length > 0) {
-      const currentQ = questions[currentIndex];
-      setDraftAnswer(answers[currentQ.id]?.selectedAnswer || null);
-    }
-  }, [currentIndex, questions, answers]);
-
-  // We removed the on-mount auto-mark so it remains grey while currently viewing.
-
-  useEffect(() => {
     if (attemptId) {
       startSecurityMonitoring();
     }
@@ -67,15 +58,20 @@ function ExamWindow() {
     };
   }, [stopSecurityMonitoring]);
 
+  const currentQ = questions[currentIndex];
+  const currentQId = currentQ?._id || currentQ?.id;
+  const currentDraftAnswer = draftAnswers[currentQId] !== undefined ? draftAnswers[currentQId] : (answers[currentQId]?.selectedAnswer ?? null);
+
   const handleAnswerChange = (value) => {
-    setDraftAnswer(value);
+    if (!currentQId) return;
+    setDraftAnswers(prev => ({ ...prev, [currentQId]: value }));
   };
 
   const handleMarkForReview = () => {
-    const currentQ = questions[currentIndex];
+    if (!currentQId) return;
     
     let newStatus = 'marked_for_review';
-    let valToSave = draftAnswer;
+    const valToSave = currentDraftAnswer;
 
     if (valToSave !== null) {
       newStatus = 'answered_and_marked';
@@ -83,63 +79,68 @@ function ExamWindow() {
 
     setAnswers(prev => ({
       ...prev,
-      [currentQ.id]: {
+      [currentQId]: {
         selectedAnswer: valToSave,
         status: newStatus
       }
     }));
 
     // Save to backend
-    saveAnswer(attemptId, currentQ.id, valToSave, newStatus).catch(err => {
-      console.error("Failed to auto-save answer:", err);
-    });
+    if (attemptId) {
+      saveAnswer(attemptId, currentQId, valToSave, newStatus).catch(err => {
+        console.error("Failed to auto-save answer:", err);
+      });
+    }
   };
 
   const handleClearResponse = () => {
-    const currentQ = questions[currentIndex];
-    setDraftAnswer(null);
+    if (!currentQId) return;
+    setDraftAnswers(prev => ({ ...prev, [currentQId]: null }));
     setAnswers(prev => {
       const next = { ...prev };
-      delete next[currentQ.id];
+      delete next[currentQId];
       return next;
     });
 
     // Reset on backend
-    saveAnswer(attemptData.attempt._id, currentQ.id, null, 'not_visited').catch(err => {
-      console.error("Failed to auto-save clear:", err);
-    });
+    if (attemptId) {
+      saveAnswer(attemptId, currentQId, null, 'not_visited').catch(err => {
+        console.error("Failed to auto-save clear:", err);
+      });
+    }
   };
 
   const markAsNotAnswered = () => {
-    const currentQ = questions[currentIndex];
-    if (!currentQ) return;
+    if (!currentQId) return;
     setAnswers(prev => {
-      if (!prev[currentQ.id]) {
-        return { ...prev, [currentQ.id]: { selectedAnswer: null, status: 'not_answered' } };
+      if (!prev[currentQId]) {
+        return { ...prev, [currentQId]: { selectedAnswer: null, status: 'not_answered' } };
       }
       return prev;
     });
   };
 
   const handleSaveAndNext = () => {
-    const currentQ = questions[currentIndex];
+    if (!currentQId) return;
     
-    if (draftAnswer !== null) {
-      const newStatus = answers[currentQ.id]?.status === 'marked_for_review' || answers[currentQ.id]?.status === 'answered_and_marked'
+    if (currentDraftAnswer !== null) {
+      const newStatus = answers[currentQId]?.status === 'marked_for_review' || answers[currentQId]?.status === 'answered_and_marked'
         ? 'answered_and_marked' 
         : 'answered';
 
       setAnswers(prev => ({
         ...prev,
-        [currentQ.id]: {
-          selectedAnswer: draftAnswer,
+        [currentQId]: {
+          selectedAnswer: currentDraftAnswer,
           status: newStatus
         }
       }));
       
-      saveAnswer(attemptData.attempt._id, currentQ.id, draftAnswer, newStatus).catch(err => {
-        console.error("Failed to auto-save answer:", err);
-      });
+      if (attemptId) {
+        saveAnswer(attemptId, currentQId, currentDraftAnswer, newStatus).catch(err => {
+          console.error("Failed to auto-save answer:", err);
+        });
+      }
     } else {
       markAsNotAnswered();
     }
@@ -157,7 +158,7 @@ function ExamWindow() {
   };
 
   const handleSubmit = async () => {
-    if (!attemptData?.attempt?._id) return;
+    if (!attemptId) return;
     try {
       setLoading(true);
       setShowConfirmSubmit(false);
@@ -187,8 +188,6 @@ function ExamWindow() {
       </div>
     );
   }
-
-  const currentQ = questions[currentIndex];
 
   return (
     <div className="panel-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -310,7 +309,7 @@ function ExamWindow() {
           <div style={{ flex: 1, overflowY: 'auto', paddingRight: '12px' }}>
             <QuestionPane 
               question={currentQ} 
-              currentAnswer={draftAnswer}
+              currentAnswer={currentDraftAnswer}
               onChange={handleAnswerChange}
             />
           </div>

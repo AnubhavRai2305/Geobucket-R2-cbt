@@ -39,7 +39,7 @@ export const getCurrentStudent = async (token) => {
     return data;
 };
 export const registerStudent = async (name, email, rollNumber, password) => {
-    const response = await fetch(`${API_BASE_URL}/student/public-register`, {
+    const response = await fetch(`${API_BASE_URL}/auth/student/public-register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

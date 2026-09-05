@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useCallback } from 'react';
 import { loginStudent, getCurrentStudent, registerStudent } from './authService';
 
 export const AuthContext = createContext(null);
@@ -7,6 +8,12 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('studentToken') || null);
     const [loading, setLoading] = useState(true);
+
+    const logout = useCallback(() => {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem('studentToken');
+    }, []);
 
     // Verify session token on initial mount or when token changes
     useEffect(() => {
@@ -28,7 +35,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         };
         initAuth();
-    }, [token]);
+    }, [token, logout]);
 
     const login = async (rollNumber, password) => {
         const data = await loginStudent(rollNumber, password);
@@ -48,12 +55,6 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('studentToken', data.token);
         }
         return data;
-    };
-
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('studentToken');
     };
 
     return (

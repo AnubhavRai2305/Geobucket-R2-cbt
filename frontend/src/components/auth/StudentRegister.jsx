@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../security/AuthContext';
 
@@ -8,16 +8,21 @@ function StudentRegister() {
     const [rollNumber, setRollNumber] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
         try {
             await register(name, email, rollNumber, password);
             navigate('/');
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Registration failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -66,7 +71,9 @@ function StudentRegister() {
                         style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
                     />
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>Register</button>
+                <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }} disabled={loading}>
+                    {loading ? 'Registering...' : 'Register'}
+                </button>
             </form>
             <p style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                 Already have an account? <Link to="/login" style={{ color: 'var(--color-primary)' }}>Login here</Link>

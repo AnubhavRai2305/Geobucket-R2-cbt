@@ -43,9 +43,9 @@ const TestBuilder = ({ onEditQuestions }) => {
         body: JSON.stringify({ isActive: !currentStatus }),
       });
       fetchTests();
-    } catch (_err) {
+    } catch {
       // Simulate toggle in UI
-      setTests(prev => prev.map(t => t.id === id ? { ...t, isActive: !currentStatus } : t));
+      setTests(prev => prev.map(t => (t._id === id || t.id === id) ? { ...t, isActive: !currentStatus } : t));
     }
   };
 
@@ -55,9 +55,9 @@ const TestBuilder = ({ onEditQuestions }) => {
         method: 'PATCH',
       });
       fetchTests();
-    } catch (_err) {
+    } catch {
       // Simulate toggle in UI
-      setTests(prev => prev.map(t => t.id === id ? { ...t, resultsPublished: !currentStatus } : t));
+      setTests(prev => prev.map(t => (t._id === id || t.id === id) ? { ...t, resultsPublished: !currentStatus } : t));
     }
   };
 
@@ -91,11 +91,12 @@ const TestBuilder = ({ onEditQuestions }) => {
       setSubject('');
       setTopic('');
       fetchTests();
-    } catch (_err) {
+    } catch {
       // Mock insert on UI for demo if no backend running
       const newTest = {
         id: Math.random().toString(),
         title,
+        description,
         subject,
         topic,
         language,
@@ -112,8 +113,8 @@ const TestBuilder = ({ onEditQuestions }) => {
     try {
       await api(`/tests/${id}`, { method: 'DELETE' });
       fetchTests();
-    } catch (_err) {
-      setTests(prev => prev.filter(t => t.id !== id));
+    } catch {
+      setTests(prev => prev.filter(t => (t._id || t.id) !== id));
     }
   };
 
@@ -144,43 +145,46 @@ const TestBuilder = ({ onEditQuestions }) => {
               </tr>
             </thead>
             <tbody>
-              {tests.map(test => (
-                <tr key={test.id}>
-                  <td><strong>{test.title}</strong></td>
-                  <td>{test.subject} / <span className="text-muted">{test.topic}</span></td>
-                  <td>{test.durationMinutes} minutes</td>
-                  <td>
-                    <button
-                      onClick={() => handleToggleActive(test.id, test.isActive)}
-                      className={`status-btn status-${test.isActive ? 'active' : 'inactive'}`}
-                    >
-                      {test.isActive ? 'Active (Published)' : 'Inactive (Draft)'}
-                    </button>
-                  </td>
-                  <td>
-                    <div className="actions-cell">
+              {tests.map(test => {
+                const testId = test._id || test.id;
+                return (
+                  <tr key={testId}>
+                    <td><strong>{test.title}</strong></td>
+                    <td>{test.subject} / <span className="text-muted">{test.topic}</span></td>
+                    <td>{test.durationMinutes} minutes</td>
+                    <td>
                       <button
-                        onClick={() => onEditQuestions(test)}
-                        className="btn btn-sm btn-outline"
+                        onClick={() => handleToggleActive(testId, test.isActive)}
+                        className={`status-btn status-${test.isActive ? 'active' : 'inactive'}`}
                       >
-                        Edit Questions
+                        {test.isActive ? 'Active (Published)' : 'Inactive (Draft)'}
                       </button>
-                      <button
-                        onClick={() => handleTogglePublish(test.id, test.resultsPublished)}
-                        className={`btn btn-sm ${test.resultsPublished ? 'btn-outline-danger' : 'btn-primary'}`}
-                      >
-                        {test.resultsPublished ? 'Hide Results' : 'Publish Results'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTest(test.id)}
-                        className="btn btn-sm btn-outline-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <div className="actions-cell">
+                        <button
+                          onClick={() => onEditQuestions(test)}
+                          className="btn btn-sm btn-outline"
+                        >
+                          Edit Questions
+                        </button>
+                        <button
+                          onClick={() => handleTogglePublish(testId, test.resultsPublished)}
+                          className={`btn btn-sm ${test.resultsPublished ? 'btn-outline-danger' : 'btn-primary'}`}
+                        >
+                          {test.resultsPublished ? 'Hide Results' : 'Publish Results'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTest(testId)}
+                          className="btn btn-sm btn-outline-danger"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
               {tests.length === 0 && (
                 <tr>
                   <td colSpan="5" className="text-center">No test modules created. Click Create Mock Test to add one.</td>

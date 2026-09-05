@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const Reports = () => {
@@ -16,7 +16,7 @@ const Reports = () => {
         const data = await api('/tests');
         setTests(data.tests || []);
         if (data.tests && data.tests.length > 0) {
-          setSelectedTestId(data.tests[0].id);
+          setSelectedTestId(data.tests[0]._id || data.tests[0].id);
         }
       } catch (err) {
         console.error(err);
@@ -25,7 +25,7 @@ const Reports = () => {
     fetchTests();
   }, []);
 
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     if (!selectedTestId) return;
     setLoading(true);
     setError('');
@@ -35,7 +35,7 @@ const Reports = () => {
 
       const attemptsData = await api(`/reports/tests/${selectedTestId}/attempts`);
       setAttempts(attemptsData.attempts || []);
-    } catch (_err) {
+    } catch {
       setError('Showing template presentation logs.');
       // Mock metrics fallbacks for presentation
       setSummary({
@@ -73,11 +73,11 @@ const Reports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTestId]);
 
   useEffect(() => {
     fetchReportData();
-  }, [selectedTestId]);
+  }, [fetchReportData]);
 
   return (
     <div className="panel-container">
@@ -90,7 +90,10 @@ const Reports = () => {
           {tests.length === 0 ? (
             <option value="">-- No Test Records --</option>
           ) : (
-            tests.map(t => <option key={t.id} value={t.id}>{t.title} ({t.subject})</option>)
+            tests.map(t => {
+              const tid = t._id || t.id;
+              return <option key={tid} value={tid}>{t.title} ({t.subject})</option>;
+            })
           )}
         </select>
         <button onClick={fetchReportData} className="btn btn-secondary">Refresh Report</button>

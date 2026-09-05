@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function Timer({ endTime, onExpire }) {
   const [timeLeft, setTimeLeft] = useState(0);

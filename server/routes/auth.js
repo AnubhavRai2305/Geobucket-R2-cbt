@@ -7,9 +7,11 @@ import { protect, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'geobucket_cbt_jwt_secret_key_2026';
+
 // Helper to generate JWT
 const generateToken = (id, userType) => {
-  return jwt.sign({ id, userType }, process.env.JWT_SECRET, {
+  return jwt.sign({ id, userType }, JWT_SECRET, {
     expiresIn: '30d',
   });
 };
@@ -32,7 +34,7 @@ router.post('/staff/register', async (req, res) => {
       ) {
         token = req.headers.authorization.split(' ')[1];
         try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const decoded = jwt.verify(token, JWT_SECRET);
           const requester = await Staff.findById(decoded.id);
 
           if (!requester || requester.role !== 'admin') {

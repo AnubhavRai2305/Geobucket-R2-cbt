@@ -17,7 +17,7 @@ export const fetchTests = async () => {
 };
 
 export const fetchTestDetails = async (testId) => {
-  const response = await fetch(`${API_BASE}/tests/${testId}`, {
+  const response = await fetch(`${API_BASE_URL}/tests/${testId}`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to fetch test details');
@@ -62,7 +62,7 @@ export const submitExam = async (attemptId) => {
 };
 
 export const fetchMyAttempts = async () => {
-  const response = await fetch(`${API_BASE}/attempts/my-attempts`, {
+  const response = await fetch(`${API_BASE_URL}/attempts/my-attempts`, {
     headers: getAuthHeaders()
   });
   if (!response.ok) throw new Error('Failed to fetch past attempts');

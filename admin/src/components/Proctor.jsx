@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const Proctor = () => {
@@ -6,7 +6,7 @@ const Proctor = () => {
   const [selectedTestId, setSelectedTestId] = useState('');
   const [attempts, setAttempts] = useState([]);
   const [selectedAttempt, setSelectedAttempt] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Fetch tests to choose from
@@ -16,7 +16,7 @@ const Proctor = () => {
         const data = await api('/tests');
         setTests(data.tests || []);
         if (data.tests && data.tests.length > 0) {
-          setSelectedTestId(data.tests[0].id);
+          setSelectedTestId(data.tests[0]._id || data.tests[0].id);
         }
       } catch (err) {
         console.error('Error fetching tests:', err.message);
@@ -26,14 +26,14 @@ const Proctor = () => {
   }, []);
 
   // Fetch attempts for selected test
-  const fetchAttempts = async () => {
+  const fetchAttempts = useCallback(async () => {
     if (!selectedTestId) return;
     setLoading(true);
     setError('');
     try {
       const data = await api(`/reports/tests/${selectedTestId}/attempts`);
       setAttempts(data.attempts || []);
-    } catch (err) {
+    } catch {
       setError('No live database logs found for this test. Showing template log format.');
       // Fallback placeholder data for UI presentation
       setAttempts([
@@ -65,11 +65,11 @@ const Proctor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTestId]);
 
   useEffect(() => {
     fetchAttempts();
-  }, [selectedTestId]);
+  }, [fetchAttempts]);
 
   const handleUnlock = async (attemptId) => {
     try {
@@ -77,7 +77,7 @@ const Proctor = () => {
       await api(`/attempts/${attemptId}/unlock`, { method: 'POST' });
       fetchAttempts();
       setSelectedAttempt(null);
-    } catch (_err) {
+    } catch {
       // Fallback unlock UI simulation
       setAttempts(prev => prev.map(a => a.attemptId === attemptId ? { ...a, status: 'active', violationsCount: 0, violations: [] } : a));
       setSelectedAttempt(null);
@@ -96,7 +96,10 @@ const Proctor = () => {
           {tests.length === 0 ? (
             <option value="">-- No Tests Available --</option>
           ) : (
-            tests.map(t => <option key={t.id} value={t.id}>{t.title} ({t.subject})</option>)
+            tests.map(t => {
+              const tid = t._id || t.id;
+              return <option key={tid} value={tid}>{t.title} ({t.subject})</option>;
+            })
           )}
         </select>
         <button onClick={fetchAttempts} className="btn btn-secondary">Refresh Logs</button>

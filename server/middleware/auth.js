@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import Staff from '../models/Staff.js';
 import Student from '../models/Student.js';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'geobucket_cbt_jwt_secret_key_2026';
+
 export const protect = async (req, res, next) => {
   let token;
 
@@ -14,7 +16,7 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // Decode token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       if (decoded.userType === 'staff') {
         req.user = await Staff.findById(decoded.id).select('-passwordHash');

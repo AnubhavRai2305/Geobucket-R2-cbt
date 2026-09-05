@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../utils/api';
 
 const QuestionEditor = ({ test, onBack }) => {
   const [questions, setQuestions] = useState([]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
 
   // Editor states
   const [type, setType] = useState('MCQ');
@@ -34,10 +34,11 @@ const QuestionEditor = ({ test, onBack }) => {
     setCorrectAnswer('');
   };
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api(`/tests/${test.id}/questions`);
+      const testId = test._id || test.id;
+      const data = await api(`/tests/${testId}/questions`);
       setQuestions(data.questions || []);
       if (data.questions && data.questions.length > 0) {
         loadQuestionIntoEditor(data.questions[0]);
@@ -72,11 +73,11 @@ const QuestionEditor = ({ test, onBack }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [test._id, test.id]);
 
   useEffect(() => {
     fetchQuestions();
-  }, [test.id]);
+  }, [fetchQuestions]);
 
   const handleAddOption = () => {
     const nextId = `opt_${options.length + 1}`;
@@ -125,28 +126,32 @@ const QuestionEditor = ({ test, onBack }) => {
     };
 
     try {
+      const testId = test._id || test.id;
       if (selectedQuestion) {
         // Edit existing
-        await api(`/questions/${selectedQuestion.id}`, {
+        const qId = selectedQuestion._id || selectedQuestion.id;
+        await api(`/questions/${qId}`, {
           method: 'PUT',
           body: JSON.stringify(payload)
         });
       } else {
         // Create new
-        await api(`/tests/${test.id}/questions`, {
+        await api(`/tests/${testId}/questions`, {
           method: 'POST',
           body: JSON.stringify(payload)
         });
       }
       fetchQuestions();
-    } catch (_err) {
+    } catch {
       // Simulate save in UI
+      const mockId = selectedQuestion ? (selectedQuestion._id || selectedQuestion.id) : Math.random().toString();
       const mockSaved = {
-        id: selectedQuestion ? selectedQuestion.id : Math.random().toString(),
+        id: mockId,
+        _id: mockId,
         ...payload
       };
       if (selectedQuestion) {
-        setQuestions(prev => prev.map(q => q.id === selectedQuestion.id ? mockSaved : q));
+        setQuestions(prev => prev.map(q => (q._id === mockId || q.id === mockId) ? mockSaved : q));
       } else {
         setQuestions(prev => [...prev, mockSaved]);
       }
@@ -159,8 +164,8 @@ const QuestionEditor = ({ test, onBack }) => {
     try {
       await api(`/questions/${id}`, { method: 'DELETE' });
       fetchQuestions();
-    } catch (_err) {
-      setQuestions(prev => prev.filter(q => q.id !== id));
+    } catch {
+      setQuestions(prev => prev.filter(q => (q._id || q.id) !== id));
       handleAddNewQuestionClick();
     }
   };
@@ -181,17 +186,21 @@ const QuestionEditor = ({ test, onBack }) => {
         <div className="questions-sidebar">
           <h3>Questions</h3>
           <ul className="question-list">
-            {questions.map((q, idx) => (
-              <li key={q.id}>
-                <button
-                  onClick={() => loadQuestionIntoEditor(q)}
-                  className={`q-select-btn ${selectedQuestion?.id === q.id ? 'active' : ''}`}
-                >
-                  <span className="q-badge">{q.type}</span>
-                  Question {idx + 1}
-                </button>
-              </li>
-            ))}
+            {questions.map((q, idx) => {
+              const qId = q._id || q.id;
+              const selectedId = selectedQuestion?._id || selectedQuestion?.id;
+              return (
+                <li key={qId}>
+                  <button
+                    onClick={() => loadQuestionIntoEditor(q)}
+                    className={`q-select-btn ${selectedId === qId ? 'active' : ''}`}
+                  >
+                    <span className="q-badge">{q.type}</span>
+                    Question {idx + 1}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
           <button onClick={handleAddNewQuestionClick} className="btn btn-block btn-outline">
             + Add New Question
@@ -203,7 +212,7 @@ const QuestionEditor = ({ test, onBack }) => {
             <h3>{selectedQuestion ? 'Edit Question Workspace' : 'New Question Workspace'}</h3>
             {selectedQuestion && (
               <button
-                onClick={() => handleDeleteQuestion(selectedQuestion.id)}
+                onClick={() => handleDeleteQuestion(selectedQuestion._id || selectedQuestion.id)}
                 className="btn btn-sm btn-outline-danger"
               >
                 Delete Question

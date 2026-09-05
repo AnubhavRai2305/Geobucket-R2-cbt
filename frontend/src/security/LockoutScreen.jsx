@@ -1,4 +1,3 @@
-import React from 'react';
 import './LockoutScreen.css';
 
 export const LockoutScreen = ({ violationsCount = 0 }) => {
