@@ -140,12 +140,21 @@ router.get('/:id/questions', protect, async (req, res) => {
     let questions;
     if (req.userType === 'student') {
       // Strips correctAnswer for students to maintain exam security
-      questions = await Question.find({ testId: req.params.id }).select('-correctAnswer');
+      questions = await Question.find({ testId: req.params.id }).select('-correctAnswer').lean();
     } else {
-      questions = await Question.find({ testId: req.params.id });
+      questions = await Question.find({ testId: req.params.id }).lean();
     }
 
-    return res.json({ success: true, questions });
+    const questionsWithMarks = questions.map(q => {
+      const scheme = test.markingScheme && test.markingScheme[q.type];
+      return {
+        ...q,
+        marks: scheme ? scheme.correct : 1,
+        negativeMarks: scheme ? Math.abs(scheme.incorrect) : 0
+      };
+    });
+
+    return res.json({ success: true, questions: questionsWithMarks });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

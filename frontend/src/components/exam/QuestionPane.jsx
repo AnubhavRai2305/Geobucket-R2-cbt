@@ -1,6 +1,6 @@
 import React from 'react';
 
-function QuestionPane({ question, currentAnswer, onChange }) {
+function QuestionPane({ question, currentAnswer, onChange, currentIndex, totalQuestions }) {
   if (!question) return null;
 
   const handleMCQChange = (optionId) => {
@@ -23,10 +23,20 @@ function QuestionPane({ question, currentAnswer, onChange }) {
   return (
     <div className="editor-main" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="editor-header">
-        <h2 style={{ fontSize: '20px', fontWeight: '700' }}>Question</h2>
-        <span className="q-badge" style={{ fontSize: '12px', padding: '4px 10px' }}>
-          {question.type}
-        </span>
+        <h2 style={{ fontSize: '20px', fontWeight: '700' }}>
+          Question {currentIndex !== undefined && totalQuestions ? `${currentIndex + 1} of ${totalQuestions}` : ''}
+        </h2>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-success)' }}>
+            +{question.marks || question.positiveMarks || 1} Marks
+          </span>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-danger)' }}>
+            -{question.negativeMarks || 0} Negative
+          </span>
+          <span className="q-badge" style={{ fontSize: '12px', padding: '4px 10px' }}>
+            {question.type}
+          </span>
+        </div>
       </div>
 
       <div 
