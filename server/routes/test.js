@@ -149,6 +149,7 @@ router.get('/:id/questions', protect, async (req, res) => {
       const scheme = test.markingScheme && test.markingScheme[q.type];
       return {
         ...q,
+        id: q._id,
         marks: scheme ? scheme.correct : 1,
         negativeMarks: scheme ? Math.abs(scheme.incorrect) : 0
       };
