@@ -46,7 +46,7 @@ function TestDetails() {
   }
 
   return (
-    <div className="panel-container" style={{ maxWidth: '800px', margin: '40px auto', padding: '32px' }}>
+    <div className="panel-container" style={{ maxWidth: '800px', margin: '40px auto', padding: '32px', height: 'auto' }}>
       <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '16px' }}>{test.title}</h2>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>

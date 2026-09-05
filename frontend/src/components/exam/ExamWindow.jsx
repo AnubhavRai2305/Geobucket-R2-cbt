@@ -311,6 +311,8 @@ function ExamWindow() {
               question={currentQ} 
               currentAnswer={currentDraftAnswer}
               onChange={handleAnswerChange}
+              currentIndex={currentIndex}
+              totalQuestions={questions.length}
             />
           </div>
           

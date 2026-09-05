@@ -50,7 +50,7 @@ function TestList() {
   }
 
   return (
-    <div className="panel-container">
+    <div className="panel-container" style={{ marginTop: '-16px', height: 'auto' }}>
       <div className="title-row">
         <div>
           <h2>Available Mock Tests</h2>
